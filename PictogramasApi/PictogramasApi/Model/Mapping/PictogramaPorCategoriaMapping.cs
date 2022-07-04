@@ -6,7 +6,7 @@ namespace PictogramasApi.Model.Mapping
     {
         public PictogramaPorCategoriaMapping()
         {
-            Table("PictogramaPorCategoria");
+            Table("PictogramasPorCategorias");
             Map(x => x.Id).Column("Id").Key(KeyType.Identity);
             Map(x => x.IdCategoria).Column("IdCategoria");
             Map(x => x.IdPictograma).Column("IdPictograma");

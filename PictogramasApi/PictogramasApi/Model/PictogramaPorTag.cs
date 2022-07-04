@@ -1,10 +1,10 @@
 ﻿
 namespace PictogramasApi.Model
 {
-    public class TagPorPictograma
+    public class PictogramaPorTag
     {
         public int Id { get; set; }
-        public int IdTag { get; set; }
         public int IdPictograma { get; set; }
+        public int IdTag { get; set; }
     }
 }

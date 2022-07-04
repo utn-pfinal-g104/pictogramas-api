@@ -2,14 +2,14 @@
 
 namespace PictogramasApi.Model.Mapping
 {
-    public class TagPorPictogramaMapping : ClassMapper<TagPorPictograma>
+    public class PictogramaPorTagMapping : ClassMapper<PictogramaPorTag>
     {
-        public TagPorPictogramaMapping()
+        public PictogramaPorTagMapping()
         {
-            Table("PictogramaPorCategoria");
+            Table("PictogramasPorTags");
             Map(x => x.Id).Column("Id").Key(KeyType.Identity);
-            Map(x => x.IdTag).Column("IdTag");
             Map(x => x.IdPictograma).Column("IdPictograma");
+            Map(x => x.IdTag).Column("IdTag");
         }
     }
 }

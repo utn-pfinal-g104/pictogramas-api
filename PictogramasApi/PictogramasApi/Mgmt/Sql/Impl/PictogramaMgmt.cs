@@ -28,7 +28,8 @@ namespace PictogramasApi.Mgmt.Impl
                     {
                         connection.Open();
                         var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
-                        pgAnd.Predicates.Add(Predicates.Field<Pictograma>(p => p.Palabra, Operator.Eq, palabra));
+                        //TODO: La palabra asociada al pictograma se encuentra en la tabla keywords, por lo cual requiere joinear
+                        pgAnd.Predicates.Add(Predicates.Field<Pictograma>(p => p.Hair.ToString(), Operator.Eq, palabra)); 
                         var pictograma = await connection.GetAsync<Pictograma>(pgAnd);
                         connection.Close();
                         return pictograma;

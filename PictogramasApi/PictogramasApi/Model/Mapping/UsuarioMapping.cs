@@ -2,12 +2,14 @@
 
 namespace PictogramasApi.Model.Mapping
 {
-    public class PictogramaMapping : ClassMapper<Pictograma>
+    public class UsuarioMapping : ClassMapper<Usuario>
     {
-        public PictogramaMapping()
+        public UsuarioMapping()
         {
-            Table("Pictogramas");
+            Table("Usuarios");
             Map(x => x.Id).Column("Id").Key(KeyType.Identity);
+            Map(x => x.NombreUsuario).Column("NombreUsuario");
+            Map(x => x.Password).Column("Password");
             Map(x => x.Hair).Column("Hair");
             Map(x => x.Schematic).Column("Schematic");
             Map(x => x.Sex).Column("Sex");
@@ -15,8 +17,6 @@ namespace PictogramasApi.Model.Mapping
             Map(x => x.Violence).Column("Violence");
             Map(x => x.Aac).Column("Aac");
             Map(x => x.AacColor).Column("AacColor");
-            Map(x => x.IdArasaac).Column("IdArasaac");
-            Map(x => x.IdUsuario).Column("IdUsuario");
         }
     }
 }
