@@ -33,8 +33,9 @@ namespace PictogramasApi.Modules
 
             GetRelaciones();
             GetCategorias();
-            GetPictogramas();
             GetPictogramaPorId();
+            GetPictogramasDeArasaacYGuardarlos();
+            GetPictogramaPorIdYGuardarlo();
             GetPictogramaPorNombre();
         }
 
@@ -56,9 +57,9 @@ namespace PictogramasApi.Modules
             });
         }
 
-        private void GetPictogramas()
+        private void GetPictogramasDeArasaacYGuardarlos()
         {
-            Get("/pictogramas", async (ctx) =>
+            Get("/pictogramas/guardar", async (ctx) =>
             {
                 var pictogramas = await ObtenerPictogramasDeArasaac();
 
@@ -80,6 +81,25 @@ namespace PictogramasApi.Modules
         private void GetPictogramaPorId()
         {
             Get("/pictogramas/{id:int}", async (ctx) =>
+            {
+                var id = ctx.Request.RouteValues.As<int>("id");
+
+                var pictograma = await ObtenerPictogramaDeArasaac(id);
+
+                if (pictograma != null)
+                {
+
+                    await ctx.Response.FromStream(pictograma, $"image/png",
+                        new ContentDisposition($"attachment;filename=pictograma.png"));
+                }
+                else
+                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+            });
+        }
+
+        private void GetPictogramaPorIdYGuardarlo()
+        {
+            Get("/pictogramas/{id:int}/guardar", async (ctx) =>
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
