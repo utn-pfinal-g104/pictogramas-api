@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace PictogramasApi.Model
 {
     public class Pictograma
@@ -13,5 +14,9 @@ namespace PictogramasApi.Model
         public bool Hair { get; set; }
         public int IdArasaac { get; set; }
         public int IdUsuario { get; set; }
+
+        public List<Categoria> Categorias { get; set; }
+        public List<Tag> Tags { get; set; }
+        public List<PalabraClave> Keywords { get; set; }
     }
 }

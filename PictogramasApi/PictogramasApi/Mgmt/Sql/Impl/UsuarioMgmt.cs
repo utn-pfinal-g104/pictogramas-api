@@ -3,11 +3,11 @@ using PictogramasApi.Mgmt.Sql.Interface;
 
 namespace PictogramasApi.Mgmt.Sql.Impl
 {
-    public class PictogramaPorCategoriaMgmt : IPictogramaPorCategoriaMgmt
+    public class UsuarioMgmt : IUsuarioMgmt
     {
         private readonly DapperContext _context;
 
-        public PictogramaPorCategoriaMgmt(DapperContext context)
+        public UsuarioMgmt(DapperContext context)
         {
             _context = context;
         }

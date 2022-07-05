@@ -1,5 +1,6 @@
 ﻿using DapperExtensions;
 using PictogramasApi.Configuration;
+using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PictogramasApi.Mgmt.Impl
+namespace PictogramasApi.Mgmt.Sql.Impl
 {
     public class CategoriaMgmt : ICategoriaMgmt
     {

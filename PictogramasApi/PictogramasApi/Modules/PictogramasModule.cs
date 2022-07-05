@@ -1,8 +1,11 @@
 ﻿using Carter;
 using Carter.Request;
 using Carter.Response;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using PictogramasApi.Mgmt;
+using PictogramasApi.Configuration;
+using PictogramasApi.Mgmt.NoSql;
+using PictogramasApi.Mgmt.Sql.Interface;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -17,14 +20,16 @@ namespace PictogramasApi.Modules
         private readonly ICategoriaMgmt _categoriaMgmt;
         private readonly IPictogramaMgmt _pictogramaMgmt;
         private readonly IHttpClientFactory _httpClientFactory;
+        private IOptions<WebServicesConfig> WebServices { get; set; }
 
         public PictogramasModule(INeo4JMgmt neo4JMgmt, ICategoriaMgmt categoriaMgmt,
-            IPictogramaMgmt pictogramaMgmt, IHttpClientFactory httpClientFactory)
+            IPictogramaMgmt pictogramaMgmt, IHttpClientFactory httpClientFactory, IOptions<WebServicesConfig> webServices)
         {
             _neo4JMgmt = neo4JMgmt;
             _categoriaMgmt = categoriaMgmt;
             _pictogramaMgmt = pictogramaMgmt;
             _httpClientFactory = httpClientFactory;
+            WebServices = webServices;
 
             GetRelaciones();
             GetCategorias();
@@ -116,7 +121,7 @@ namespace PictogramasApi.Modules
         {
             var httpRequestMessage = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"https://api.arasaac.org/api/pictograms/all/es")
+                $"{WebServices.Value.ArasaacUri}/api/pictograms/all/es")
                 {
                     Headers = {}
                 };
@@ -141,7 +146,7 @@ namespace PictogramasApi.Modules
         {
             var httpRequestMessage = new HttpRequestMessage(
                 HttpMethod.Get,
-                $"https://api.arasaac.org/api/pictograms/{id}")
+                $"{WebServices.Value.ArasaacUri}/api/pictograms/{id}")
                 {
                     Headers = {}
                 };

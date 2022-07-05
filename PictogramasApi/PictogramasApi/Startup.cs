@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Carter;
-using PictogramasApi.Mgmt;
-using PictogramasApi.Mgmt.Impl;
+using PictogramasApi.Mgmt.Sql.Impl;
+using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Configuration;
+using PictogramasApi.Mgmt.NoSql;
 
 namespace PictogramasApi
 {
@@ -21,12 +22,20 @@ namespace PictogramasApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<Neo4JConfig>(config => Configuration.GetSection(Neo4JConfig.Section).Bind(config));
+            services.Configure<WebServicesConfig>(config => Configuration.GetSection(WebServicesConfig.Section).Bind(config));
+
             services.AddSingleton<DapperContext>();
             services.AddHttpClient();
             services.AddCarter();
             services.AddControllers();
+
             services.AddSingleton<INeo4JMgmt,Neo4JMgmt>();
             services.AddSingleton<ICategoriaMgmt, CategoriaMgmt>();
+            services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
+            services.AddSingleton<IPalabraClaveMgmt, PalabraClaveMgmt>();
+            services.AddSingleton<IPictogramaPorCategoriaMgmt, PictogramaPorCategoriaMgmt>();
+            services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
         }
 

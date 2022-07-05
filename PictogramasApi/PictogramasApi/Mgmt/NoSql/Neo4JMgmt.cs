@@ -1,20 +1,23 @@
-﻿using Neo4j.Driver;
+﻿using Microsoft.Extensions.Options;
+using Neo4j.Driver;
+using PictogramasApi.Configuration;
 using PictogramasApi.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PictogramasApi.Mgmt.Impl
+namespace PictogramasApi.Mgmt.NoSql
 {
     public class Neo4JMgmt : INeo4JMgmt
     {
-        private bool _disposed = false;
         private readonly IDriver _driver;
+        private IOptions<Neo4JConfig> Neo4JConfig { get; set; }
 
-        public Neo4JMgmt()
+        public Neo4JMgmt(IOptions<Neo4JConfig> neo4JConfig)
         {
-            _driver = GraphDatabase.Driver("neo4j+s://c1837971.databases.neo4j.io:7687", AuthTokens.Basic("neo4j", "apTzNLk3BRRKx90SfOpT7JDUmo_tKg5nC4MsdrfmJ3o"));
+            Neo4JConfig = neo4JConfig;
+            _driver = GraphDatabase.Driver(Neo4JConfig.Value.Uri, AuthTokens.Basic(Neo4JConfig.Value.User, Neo4JConfig.Value.Password));
         }
 
         public async Task<PictogramaGrafo> ObtenerPictograma(int id)

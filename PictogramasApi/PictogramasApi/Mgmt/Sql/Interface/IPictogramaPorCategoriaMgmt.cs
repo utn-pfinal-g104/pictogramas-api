@@ -1,5 +1,5 @@
 ﻿
-namespace PictogramasApi.Mgmt
+namespace PictogramasApi.Mgmt.Sql.Interface
 {
     public interface IPictogramaPorCategoriaMgmt
     {

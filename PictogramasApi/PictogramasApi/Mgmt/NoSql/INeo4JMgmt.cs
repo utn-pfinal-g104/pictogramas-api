@@ -1,7 +1,7 @@
 ﻿using PictogramasApi.Model;
 using System.Threading.Tasks;
 
-namespace PictogramasApi.Mgmt
+namespace PictogramasApi.Mgmt.NoSql
 {
     public interface INeo4JMgmt
     {

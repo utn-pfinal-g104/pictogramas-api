@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PictogramasApi.Mgmt
+namespace PictogramasApi.Mgmt.Sql.Interface
 {
     public interface ICategoriaMgmt
     {
