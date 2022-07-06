@@ -21,6 +21,7 @@ namespace PictogramasApi.Mgmt.CMS
         {
             BlobClient blob = container.GetBlobClient(fileName);
             blob.Upload(file);
+            var fileUrl = blob.Uri.AbsoluteUri;
         }
 
         public Stream Obtener(string filename)

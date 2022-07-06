@@ -147,7 +147,7 @@ namespace PictogramasApi.Modules
 
         private void DeletePictogramaDelStorage()
         {
-            Get("/pictogramas/{filename:minlength(1)}/borrar", async (ctx) =>
+            Delete("/pictogramas/{filename:minlength(1)}", async (ctx) =>
             {
                 var filename = ctx.Request.RouteValues.As<string>("filename");
 
