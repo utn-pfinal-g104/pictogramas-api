@@ -7,6 +7,7 @@ using PictogramasApi.Mgmt.Sql.Impl;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.NoSql;
+using PictogramasApi.Mgmt.CMS;
 
 namespace PictogramasApi
 {
@@ -38,7 +39,7 @@ namespace PictogramasApi
             services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
-
+            services.AddSingleton<IStorageMgmt, StorageMgmt>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

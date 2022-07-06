@@ -30,17 +30,17 @@ namespace PictogramasApi.Modules
 
         private void GetUsuarioPorNombre()
         {
-            throw new NotImplementedException();
+
         }
 
         private void PostUsuario()
         {
-            throw new NotImplementedException();
+
         }
 
         private void PatchUsuario()
         {
-            throw new NotImplementedException();
+
         }
     }
 }

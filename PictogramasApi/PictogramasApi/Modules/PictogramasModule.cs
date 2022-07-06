@@ -4,6 +4,7 @@ using Carter.Response;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using PictogramasApi.Configuration;
+using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.NoSql;
 using PictogramasApi.Mgmt.Sql.Interface;
 using System.Collections.Generic;
@@ -19,15 +20,20 @@ namespace PictogramasApi.Modules
         private readonly INeo4JMgmt _neo4JMgmt;
         private readonly ICategoriaMgmt _categoriaMgmt;
         private readonly IPictogramaMgmt _pictogramaMgmt;
+        private readonly IStorageMgmt _storageMgmt;
+
         private readonly IHttpClientFactory _httpClientFactory;
         private IOptions<WebServicesConfig> WebServices { get; set; }
 
         public PictogramasModule(INeo4JMgmt neo4JMgmt, ICategoriaMgmt categoriaMgmt,
-            IPictogramaMgmt pictogramaMgmt, IHttpClientFactory httpClientFactory, IOptions<WebServicesConfig> webServices)
+            IPictogramaMgmt pictogramaMgmt, IHttpClientFactory httpClientFactory,
+            IStorageMgmt storageMgmt,IOptions<WebServicesConfig> webServices)
         {
             _neo4JMgmt = neo4JMgmt;
             _categoriaMgmt = categoriaMgmt;
             _pictogramaMgmt = pictogramaMgmt;
+            _storageMgmt = storageMgmt;
+
             _httpClientFactory = httpClientFactory;
             WebServices = webServices;
 
@@ -38,6 +44,10 @@ namespace PictogramasApi.Modules
 
             GetPictogramaPorIdYGuardarlo();
             GetPictogramasDeArasaacYGuardarlos();
+
+            GetPictogramaDelStorage();
+
+            DeletePictogramaDelStorage();
         }
 
         private void GetRelaciones()
@@ -108,12 +118,41 @@ namespace PictogramasApi.Modules
 
                 if (pictograma != null)
                 {
-
+                    _storageMgmt.Guardar(pictograma, "pictograma");
                     await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
                 }
                 else
                     await ctx.Response.Negotiate("Error obteniendo el pictograma");
+            });
+        }
+
+        private void GetPictogramaDelStorage()
+        {
+            Get("/pictogramas/{filename:minlength(1)}/obtener", async (ctx) =>
+            {
+                var filename = ctx.Request.RouteValues.As<string>("filename");
+
+                var pictograma = _storageMgmt.Obtener(filename);
+
+                if (pictograma != null)
+                {                    
+                    await ctx.Response.FromStream(pictograma, $"image/png",
+                        new ContentDisposition($"attachment;filename=pictograma.png"));
+                }
+                else
+                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+            });
+        }
+
+        private void DeletePictogramaDelStorage()
+        {
+            Get("/pictogramas/{filename:minlength(1)}/borrar", async (ctx) =>
+            {
+                var filename = ctx.Request.RouteValues.As<string>("filename");
+
+                _storageMgmt.Borrar(filename);
+                await ctx.Response.Negotiate("Pictograma eliminado");
             });
         }
 
