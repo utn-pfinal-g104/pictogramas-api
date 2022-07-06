@@ -8,6 +8,11 @@ using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.NoSql;
 using PictogramasApi.Mgmt.CMS;
+using PictogramasApi.Jobs;
+using PictogramasApi.JobsConfiguration;
+using Quartz.Spi;
+using Quartz.Impl;
+using Quartz;
 
 namespace PictogramasApi
 {
@@ -40,6 +45,19 @@ namespace PictogramasApi
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
             services.AddSingleton<IStorageMgmt, StorageMgmt>();
+
+            // Add Quartz services
+            services.AddSingleton<IJobFactory, SingletonJobFactory>();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+
+            // Add our job
+            services.AddSingleton<ActualizacionStorageJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(ActualizacionStorageJob),
+                cronExpression: Configuration.GetValue<string>("CronExpression")));
+
+            // Quartz Hosted Service
+            services.AddHostedService<QuartzHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
