@@ -34,9 +34,10 @@ namespace PictogramasApi.Modules
             GetRelaciones();
             GetCategorias();
             GetPictogramaPorId();
-            GetPictogramasDeArasaacYGuardarlos();
-            GetPictogramaPorIdYGuardarlo();
             GetPictogramaPorNombre();
+
+            GetPictogramaPorIdYGuardarlo();
+            GetPictogramasDeArasaacYGuardarlos();
         }
 
         private void GetRelaciones()
