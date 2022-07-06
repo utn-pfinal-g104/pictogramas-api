@@ -1,17 +1,13 @@
 ﻿using Carter;
 using Carter.Request;
 using Carter.Response;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using PictogramasApi.Configuration;
+using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.NoSql;
 using PictogramasApi.Mgmt.Sql.Interface;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Net.Mime;
-using System.Threading.Tasks;
 
 namespace PictogramasApi.Modules
 {
@@ -22,20 +18,16 @@ namespace PictogramasApi.Modules
         private readonly IPictogramaMgmt _pictogramaMgmt;
         private readonly IStorageMgmt _storageMgmt;
 
-        private readonly IHttpClientFactory _httpClientFactory;
-        private IOptions<WebServicesConfig> WebServices { get; set; }
+        private readonly ActualizacionStorageJob _actualizacionStorageJob;
 
         public PictogramasModule(INeo4JMgmt neo4JMgmt, ICategoriaMgmt categoriaMgmt,
-            IPictogramaMgmt pictogramaMgmt, IHttpClientFactory httpClientFactory,
-            IStorageMgmt storageMgmt,IOptions<WebServicesConfig> webServices)
+            IPictogramaMgmt pictogramaMgmt, IStorageMgmt storageMgmt,ActualizacionStorageJob actualizacionStorageJob)
         {
             _neo4JMgmt = neo4JMgmt;
             _categoriaMgmt = categoriaMgmt;
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
-
-            _httpClientFactory = httpClientFactory;
-            WebServices = webServices;
+            _actualizacionStorageJob = actualizacionStorageJob;
 
             GetRelaciones();
             GetCategorias();
@@ -45,7 +37,7 @@ namespace PictogramasApi.Modules
             GetPictogramaPorIdYGuardarlo();
             GetPictogramasDeArasaacYGuardarlos();
 
-            GetPictogramaDelStorage();
+            GetPictogramaDelStorage();            
 
             DeletePictogramaDelStorage();
         }
@@ -72,14 +64,17 @@ namespace PictogramasApi.Modules
         {
             Get("/pictogramas/guardar", async (ctx) =>
             {
-                var pictogramas = await ObtenerPictogramasDeArasaac();
+                //TODO: Cuando esto se implemente, el resto desaparece
+                //_actualizacionStorageJob.ActualizarPictogramas();
+
+                var pictogramas = await _actualizacionStorageJob.ObtenerPictogramasDeArasaac();
 
                 if (pictogramas != null)
                 {
                     List<Stream> pictogramasAsStreams = new List<Stream>();
                     foreach(var pictograma in pictogramas)
                     {
-                        var pictogramaAsStream = await ObtenerPictogramaDeArasaac(pictograma._id);
+                        var pictogramaAsStream = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(pictograma._id);
                         pictogramasAsStreams.Add(pictogramaAsStream);
                     }
                     await ctx.Response.Negotiate(pictogramas);
@@ -95,7 +90,7 @@ namespace PictogramasApi.Modules
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
-                var pictograma = await ObtenerPictogramaDeArasaac(id);
+                var pictograma = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(id);
 
                 if (pictograma != null)
                 {
@@ -114,7 +109,7 @@ namespace PictogramasApi.Modules
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
-                var pictograma = await ObtenerPictogramaDeArasaac(id);
+                var pictograma = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(id);
 
                 if (pictograma != null)
                 {
@@ -164,7 +159,7 @@ namespace PictogramasApi.Modules
 
                 var pictograma = await _pictogramaMgmt.ObtenerPictogramaPorPalabra(palabra);
 
-                var pictogramaArasaac = await ObtenerPictogramaDeArasaac(pictograma.IdArasaac);
+                var pictogramaArasaac = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(pictograma.IdArasaac);
 
                 if (pictogramaArasaac != null)
                 {
@@ -175,57 +170,6 @@ namespace PictogramasApi.Modules
                 else
                     await ctx.Response.Negotiate("Error obteniendo el pictograma");
             });
-        }
-
-        public async Task<List<Model.Responses.Pictograma>> ObtenerPictogramasDeArasaac()
-        {
-            var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Get,
-                $"{WebServices.Value.ArasaacUri}/api/pictograms/all/es")
-                {
-                    Headers = {}
-                };
-
-            var httpClient = _httpClientFactory.CreateClient();
-            var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-            string responseAsString;
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                responseAsString = await httpResponseMessage.Content.ReadAsStringAsync();
-                var responseJson = JArray.Parse(responseAsString);
-                var listaDePictogramas = responseJson.ToObject<List<Model.Responses.Pictograma>>();
-                return listaDePictogramas;
-            }
-            else
-                return null;
-        }
-
-        public async Task<Stream> ObtenerPictogramaDeArasaac(int id)
-        {
-            var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Get,
-                $"{WebServices.Value.ArasaacUri}/api/pictograms/{id}")
-                {
-                    Headers = {}
-                };
-
-            var httpClient = _httpClientFactory.CreateClient();
-            var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-            Stream contentStream;
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
-                Stream copyStream = new MemoryStream();
-                contentStream.CopyTo(copyStream);
-                copyStream.Seek(0, SeekOrigin.Begin);
-                return copyStream;
-            }
-            else
-                return null;
         }
     }
 }
