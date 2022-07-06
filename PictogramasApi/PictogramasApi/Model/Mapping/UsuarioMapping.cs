@@ -8,15 +8,15 @@ namespace PictogramasApi.Model.Mapping
         {
             Table("Usuarios");
             Map(x => x.Id).Column("Id").Key(KeyType.Identity);
-            Map(x => x.NombreUsuario).Column("NombreUsuario");
+            Map(x => x.NombreUsuario).Column("Usuario");
             Map(x => x.Password).Column("Password");
-            Map(x => x.Hair).Column("Hair");
             Map(x => x.Schematic).Column("Schematic");
             Map(x => x.Sex).Column("Sex");
             Map(x => x.Skin).Column("Skin");
             Map(x => x.Violence).Column("Violence");
             Map(x => x.Aac).Column("Aac");
             Map(x => x.AacColor).Column("AacColor");
+            Map(x => x.Hair).Column("Hair");//TODO agregar campo en la bd de azure
         }
     }
 }

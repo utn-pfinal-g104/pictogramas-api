@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Carter.Response;
 using PictogramasApi.Mgmt.Sql.Interface;
 using System;
 
@@ -20,7 +21,11 @@ namespace PictogramasApi.Modules
 
         private void GetUsuarios()
         {
-            throw new NotImplementedException();
+            Get("/usuarios", async (ctx) =>
+            {
+                var usuarios = await _usuarioMgmt.GetUsuarios();
+                await ctx.Response.Negotiate(usuarios);
+            });
         }
 
         private void GetUsuarioPorNombre()

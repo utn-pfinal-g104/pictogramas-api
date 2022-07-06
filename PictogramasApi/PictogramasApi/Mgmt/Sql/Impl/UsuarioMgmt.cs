@@ -1,15 +1,44 @@
-﻿using PictogramasApi.Configuration;
+﻿using DapperExtensions;
+using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
+using PictogramasApi.Model;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PictogramasApi.Mgmt.Sql.Impl
 {
-    public class UsuarioMgmt : IUsuarioMgmt
+    public class UsuarioaMgmt : IUsuarioMgmt
     {
         private readonly DapperContext _context;
-
-        public UsuarioMgmt(DapperContext context)
+        public UsuarioaMgmt(DapperContext context)
         {
             _context = context;
         }
+
+        public async Task<List<Usuario>> GetUsuarios()
+        {
+            try
+            {
+                return await Task.Run(async () =>
+                {
+                    using (IDbConnection connection = _context.CreateConnection())
+                    {
+                        connection.Open();
+                        var categorias = await connection.GetListAsync<Usuario>();
+                        connection.Close();
+                        return categorias.ToList();
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
     }
 }

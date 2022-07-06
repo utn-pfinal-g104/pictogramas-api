@@ -37,7 +37,7 @@ namespace PictogramasApi
             services.AddSingleton<IPictogramaPorCategoriaMgmt, PictogramaPorCategoriaMgmt>();
             services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
-            services.AddSingleton<IUsuarioMgmt, UsuarioMgmt>();
+            services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
 
         }
 
