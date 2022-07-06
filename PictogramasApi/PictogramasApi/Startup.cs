@@ -37,6 +37,8 @@ namespace PictogramasApi
             services.AddSingleton<IPictogramaPorCategoriaMgmt, PictogramaPorCategoriaMgmt>();
             services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
+            services.AddSingleton<IUsuarioMgmt, UsuarioMgmt>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
