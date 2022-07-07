@@ -56,6 +56,7 @@ namespace PictogramasApi.Jobs
 
         internal async void ActualizarPictogramas()
         {
+            // Dejo esto hasta que el metodo este finalizado
             throw new NotImplementedException();
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await ObtenerPictogramasDeArasaac();
@@ -65,7 +66,10 @@ namespace PictogramasApi.Jobs
             HashSet<string> tags = ObtenerTags(pictogramasArasaac);
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
-            //TODO: Armar Bulk Inserts
+            await _categoriaMgmt.AgregarCategorias(categorias);
+            await _tagMgmt.AgregarTags(tags);
+            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
             List<Stream> pictogramasAsStreams = new List<Stream>();
             foreach (var pictograma in pictogramasArasaac)

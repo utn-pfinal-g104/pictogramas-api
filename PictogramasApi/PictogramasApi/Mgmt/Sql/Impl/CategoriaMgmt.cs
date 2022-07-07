@@ -19,6 +19,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             _context = context;
         }
 
+        public async Task AgregarCategorias(HashSet<string> categorias)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await connection.InsertAsync((IEnumerable<Categoria>)categorias);
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<Categoria>> GetCategorias()
         {
             try
