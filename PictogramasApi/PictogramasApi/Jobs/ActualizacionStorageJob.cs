@@ -1,16 +1,12 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using PictogramasApi.Configuration;
-using PictogramasApi.Mgmt.CMS;
+﻿using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
+using PictogramasApi.Services;
 using Quartz;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace PictogramasApi.Jobs
@@ -24,15 +20,13 @@ namespace PictogramasApi.Jobs
         private readonly ITagMgmt _tagMgmt;
         private readonly IPictogramaPorTagMgmt _pictogramaPorTagMgmt;
         private readonly IPictogramaPorCategoriaMgmt _pictogramaPorCategoriaMgmt;
-        private readonly IUsuarioMgmt _usuarioMgmt;
 
-        private readonly IHttpClientFactory _httpClientFactory;
-        private IOptions<WebServicesConfig> WebServices { get; set; }
+        private readonly ArasaacService _arasaacService;
 
-        public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt, ICategoriaMgmt categoriaMgmt,
-            IPalabraClaveMgmt palabraClaveMgmt, ITagMgmt tagMgmt, IPictogramaPorTagMgmt pictogramaPorTagMgmt,
-            IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt, IHttpClientFactory httpClientFactory,
-            IUsuarioMgmt usuarioMgmt, IStorageMgmt storageMgmt, IOptions<WebServicesConfig> webServices)
+        public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt, ITagMgmt tagMgmt,
+            IPalabraClaveMgmt palabraClaveMgmt, IPictogramaPorTagMgmt pictogramaPorTagMgmt,
+            IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt, ArasaacService arasaacService,
+            IStorageMgmt storageMgmt, ICategoriaMgmt categoriaMgmt)
         {
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
@@ -41,10 +35,8 @@ namespace PictogramasApi.Jobs
             _tagMgmt = tagMgmt;
             _pictogramaPorTagMgmt = pictogramaPorTagMgmt;
             _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
-            _usuarioMgmt = usuarioMgmt;
 
-            _httpClientFactory = httpClientFactory;
-            WebServices = webServices;
+            _arasaacService = arasaacService;
         }
 
         public Task Execute(IJobExecutionContext context)
@@ -59,11 +51,11 @@ namespace PictogramasApi.Jobs
             // Dejo esto hasta que el metodo este finalizado
             throw new NotImplementedException();
 
-            List<Model.Responses.Pictograma> pictogramasArasaac = await ObtenerPictogramasDeArasaac();
+            List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 
             List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
-            HashSet<string> categorias = ObtenerCategorias(pictogramasArasaac);
-            HashSet<string> tags = ObtenerTags(pictogramasArasaac);
+            List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
+            List<Tag> tags = ObtenerTags(pictogramasArasaac);
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
             await _categoriaMgmt.AgregarCategorias(categorias);
@@ -71,12 +63,53 @@ namespace PictogramasApi.Jobs
             await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
             await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
+            List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categorias, pictogramas, pictogramasArasaac);
+            List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tags, pictogramas, pictogramasArasaac);
+
+            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
+            await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
+
             List<Stream> pictogramasAsStreams = new List<Stream>();
             foreach (var pictograma in pictogramasArasaac)
             {
-                var pictogramaAsStream = await ObtenerPictogramaDeArasaac(pictograma._id);
-                pictogramasAsStreams.Add(pictogramaAsStream);
+                var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
+                _storageMgmt.Guardar(pictogramaAsStream, $"Arasaac-{pictograma._id}"); // Como lo guardamos?
+                //pictogramasAsStreams.Add(pictogramaAsStream);
             }
+        }
+
+        private static List<PictogramaPorCategoria> ObtenerPictogramasPorCategorias(List<Categoria> categorias, List<Pictograma> pictogramas, List<Model.Responses.Pictograma> pictogramasArasaac)
+        {
+            List<PictogramaPorCategoria> picsXcats = new List<PictogramaPorCategoria>();
+            foreach (var pictograma in pictogramasArasaac)
+            {
+                foreach(var categoria in pictograma.categories)
+                {
+                    picsXcats.Add(new PictogramaPorCategoria
+                    {
+                        IdCategoria = categorias.FirstOrDefault(c => c.Nombre == categoria).Id,
+                        IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                    });
+                }
+            }
+            return picsXcats;
+        }
+
+        private static List<PictogramaPorTag> ObtenerPictogramasPorTags(List<Tag> tags, List<Pictograma> pictogramas, List<Model.Responses.Pictograma> pictogramasArasaac)
+        {
+            List<PictogramaPorTag> picsXtags = new List<PictogramaPorTag>();
+            foreach (var pictograma in pictogramasArasaac)
+            {
+                foreach (var tag in pictograma.tags)
+                {
+                    picsXtags.Add(new PictogramaPorTag
+                    {
+                        IdTag = tags.FirstOrDefault(t => t.Nombre == tag).Id,
+                        IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                    });
+                }
+            }
+            return picsXtags;
         }
 
         private List<Pictograma> MapearPictogramas(List<Model.Responses.Pictograma> pictogramasArasaac)
@@ -96,7 +129,6 @@ namespace PictogramasApi.Jobs
                     Violence = pictograma.violence
                 });
             }
-
             return pictogramas;
         }
 
@@ -119,77 +151,32 @@ namespace PictogramasApi.Jobs
             return palabrasClaves;
         }
 
-        private HashSet<string> ObtenerTags(List<Model.Responses.Pictograma> pictogramas)
+        private List<Tag> ObtenerTags(List<Model.Responses.Pictograma> pictogramas)
         {
-            HashSet<string> tags = new HashSet<string>();
+            List<Tag> tags = new List<Tag>();
             foreach (var pictograma in pictogramas)
             {
                 foreach (var tag in pictograma.tags)
-                    tags.Add(tag);
+                {
+                    if(!tags.Any(t => t.Nombre == tag))
+                        tags.Add(new Tag { Nombre = tag });
+                }
             }
             return tags;
         }
 
-        private static HashSet<string> ObtenerCategorias(List<Model.Responses.Pictograma> pictogramas)
+        private static List<Categoria> ObtenerCategorias(List<Model.Responses.Pictograma> pictogramas)
         {
-            HashSet<string> categorias = new HashSet<string>();
+            List<Categoria> categorias = new List<Categoria>();
             foreach (var pictograma in pictogramas)
             {
                 foreach (var categoria in pictograma.categories)
-                    categorias.Add(categoria);
+                {
+                    if(!categorias.Any(c => categoria == c.Nombre))
+                        categorias.Add(new Categoria { Nombre = categoria });
+                }
             }
             return categorias;
-        }
-
-        public async Task<List<Model.Responses.Pictograma>> ObtenerPictogramasDeArasaac()
-        {
-            var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Get,
-                $"{WebServices.Value.ArasaacUri}/api/pictograms/all/es")
-            {
-                Headers = { }
-            };
-
-            var httpClient = _httpClientFactory.CreateClient();
-            var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-            string responseAsString;
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                responseAsString = await httpResponseMessage.Content.ReadAsStringAsync();
-                var responseJson = JArray.Parse(responseAsString);
-                var listaDePictogramas = responseJson.ToObject<List<Model.Responses.Pictograma>>();
-                return listaDePictogramas;
-            }
-            else
-                return null;
-        }
-
-        public async Task<Stream> ObtenerPictogramaDeArasaac(int id)
-        {
-            var httpRequestMessage = new HttpRequestMessage(
-                HttpMethod.Get,
-                $"{WebServices.Value.ArasaacUri}/api/pictograms/{id}")
-            {
-                Headers = { }
-            };
-
-            var httpClient = _httpClientFactory.CreateClient();
-            var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
-
-            Stream contentStream;
-
-            if (httpResponseMessage.IsSuccessStatusCode)
-            {
-                contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
-                Stream copyStream = new MemoryStream();
-                contentStream.CopyTo(copyStream);
-                copyStream.Seek(0, SeekOrigin.Begin);
-                return copyStream;
-            }
-            else
-                return null;
         }
     }
 }

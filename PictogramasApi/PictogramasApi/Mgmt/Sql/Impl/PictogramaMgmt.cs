@@ -26,7 +26,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await connection.InsertAsync((IEnumerable<Pictograma>)pictogramas);
+                    await connection.InsertAsync(pictogramas);
                     connection.Close();
                 }
             }

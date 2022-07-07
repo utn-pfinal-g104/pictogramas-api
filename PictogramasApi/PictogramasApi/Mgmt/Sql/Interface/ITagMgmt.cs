@@ -1,4 +1,4 @@
-﻿
+﻿using PictogramasApi.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,6 +6,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
 {
     public interface ITagMgmt
     {
-        Task AgregarTags(HashSet<string> tags);
+        Task AgregarTags(List<Tag> tags);
     }
 }

@@ -15,6 +15,7 @@ using Quartz.Impl;
 using Quartz;
 using AutoMapper;
 using PictogramasApi.Utils;
+using PictogramasApi.Services;
 
 namespace PictogramasApi
 {
@@ -39,6 +40,8 @@ namespace PictogramasApi
             services.AddControllers();
 
             services.AddSingleton<INeo4JMgmt,Neo4JMgmt>();
+            services.AddSingleton<IStorageMgmt, StorageMgmt>();
+
             services.AddSingleton<ICategoriaMgmt, CategoriaMgmt>();
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
             services.AddSingleton<IPalabraClaveMgmt, PalabraClaveMgmt>();
@@ -46,7 +49,8 @@ namespace PictogramasApi
             services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
             services.AddSingleton<ITagMgmt, TagMgmt>();
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
-            services.AddSingleton<IStorageMgmt, StorageMgmt>();
+
+            services.AddSingleton<ArasaacService>();
 
             // Add Quartz services
             services.AddSingleton<IJobFactory, SingletonJobFactory>();

@@ -18,14 +18,14 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             _context = context;
         }
 
-        public async Task AgregarTags(HashSet<string> tags)
+        public async Task AgregarTags(List<Tag> tags)
         {
             try
             {
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await connection.InsertAsync((IEnumerable<Tag>)tags);
+                    await connection.InsertAsync(tags);
                     connection.Close();
                 }
             }

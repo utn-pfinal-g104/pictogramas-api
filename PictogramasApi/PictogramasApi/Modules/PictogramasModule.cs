@@ -5,6 +5,7 @@ using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.NoSql;
 using PictogramasApi.Mgmt.Sql.Interface;
+using PictogramasApi.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Mime;
@@ -19,8 +20,9 @@ namespace PictogramasApi.Modules
         private readonly IStorageMgmt _storageMgmt;
 
         private readonly ActualizacionStorageJob _actualizacionStorageJob;
+        private readonly ArasaacService _arasaacService;
 
-        public PictogramasModule(INeo4JMgmt neo4JMgmt, ICategoriaMgmt categoriaMgmt,
+        public PictogramasModule(INeo4JMgmt neo4JMgmt, ICategoriaMgmt categoriaMgmt, ArasaacService arasaacService,
             IPictogramaMgmt pictogramaMgmt, IStorageMgmt storageMgmt,ActualizacionStorageJob actualizacionStorageJob)
         {
             _neo4JMgmt = neo4JMgmt;
@@ -28,6 +30,7 @@ namespace PictogramasApi.Modules
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
             _actualizacionStorageJob = actualizacionStorageJob;
+            _arasaacService = arasaacService;
 
             GetRelaciones();
             GetCategorias();
@@ -67,14 +70,14 @@ namespace PictogramasApi.Modules
                 //TODO: Cuando esto se implemente, el resto desaparece
                 _actualizacionStorageJob.ActualizarPictogramas();
 
-                var pictogramas = await _actualizacionStorageJob.ObtenerPictogramasDeArasaac();
+                var pictogramas = await _arasaacService.ObtenerPictogramasDeArasaac();
 
                 if (pictogramas != null)
                 {
                     List<Stream> pictogramasAsStreams = new List<Stream>();
                     foreach(var pictograma in pictogramas)
                     {
-                        var pictogramaAsStream = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(pictograma._id);
+                        var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
                         pictogramasAsStreams.Add(pictogramaAsStream);
                     }
                     await ctx.Response.Negotiate(pictogramas);
@@ -90,7 +93,7 @@ namespace PictogramasApi.Modules
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
-                var pictograma = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(id);
+                var pictograma = await _arasaacService.ObtenerPictogramaDeArasaac(id);
 
                 if (pictograma != null)
                 {
@@ -109,7 +112,7 @@ namespace PictogramasApi.Modules
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
-                var pictograma = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(id);
+                var pictograma = await _arasaacService.ObtenerPictogramaDeArasaac(id);
 
                 if (pictograma != null)
                 {
@@ -159,7 +162,7 @@ namespace PictogramasApi.Modules
 
                 var pictograma = await _pictogramaMgmt.ObtenerPictogramaPorPalabra(palabra);
 
-                var pictogramaArasaac = await _actualizacionStorageJob.ObtenerPictogramaDeArasaac(pictograma.IdArasaac);
+                var pictogramaArasaac = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma.IdArasaac);
 
                 if (pictogramaArasaac != null)
                 {
