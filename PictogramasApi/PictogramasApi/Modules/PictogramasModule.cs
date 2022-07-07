@@ -65,7 +65,7 @@ namespace PictogramasApi.Modules
             Get("/pictogramas/guardar", async (ctx) =>
             {
                 //TODO: Cuando esto se implemente, el resto desaparece
-                //_actualizacionStorageJob.ActualizarPictogramas();
+                _actualizacionStorageJob.ActualizarPictogramas();
 
                 var pictogramas = await _actualizacionStorageJob.ObtenerPictogramasDeArasaac();
 

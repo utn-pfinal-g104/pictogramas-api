@@ -13,6 +13,8 @@ using PictogramasApi.JobsConfiguration;
 using Quartz.Spi;
 using Quartz.Impl;
 using Quartz;
+using AutoMapper;
+using PictogramasApi.Utils;
 
 namespace PictogramasApi
 {
@@ -42,7 +44,7 @@ namespace PictogramasApi
             services.AddSingleton<IPalabraClaveMgmt, PalabraClaveMgmt>();
             services.AddSingleton<IPictogramaPorCategoriaMgmt, PictogramaPorCategoriaMgmt>();
             services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
-            services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
+            services.AddSingleton<ITagMgmt, TagMgmt>();
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
             services.AddSingleton<IStorageMgmt, StorageMgmt>();
 
@@ -58,6 +60,17 @@ namespace PictogramasApi
 
             // Quartz Hosted Service
             services.AddHostedService<QuartzHostedService>();
+
+            // Auto Mapper Configurations
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
