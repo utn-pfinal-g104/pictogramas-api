@@ -1,4 +1,5 @@
-﻿using DapperExtensions;
+﻿using Dapper;
+using DapperExtensions;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -23,10 +24,13 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             try
             {
+                string result = String.Join(",", categorias.Select(c => "('" + c.Nombre + "')"));
+                string insert = $"insert into categorias (nombre) values {result}";
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await connection.InsertAsync(categorias);
+                    await Task.Run (() => connection.Execute(insert));
+                    //await connection.InsertAsync(categorias); // error: This operation is only valid on generic types
                     connection.Close();
                 }
             }

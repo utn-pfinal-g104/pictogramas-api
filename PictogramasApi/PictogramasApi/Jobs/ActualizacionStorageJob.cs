@@ -49,7 +49,7 @@ namespace PictogramasApi.Jobs
         internal async void ActualizarPictogramas()
         {
             // Dejo esto hasta que el metodo este finalizado
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 
@@ -58,7 +58,7 @@ namespace PictogramasApi.Jobs
             List<Tag> tags = ObtenerTags(pictogramasArasaac);
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
-            await _categoriaMgmt.AgregarCategorias(categorias);
+            //await _categoriaMgmt.AgregarCategorias(categorias); // Implementado
             await _tagMgmt.AgregarTags(tags);
             await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
             await _pictogramaMgmt.AgregarPictogramas(pictogramas);
