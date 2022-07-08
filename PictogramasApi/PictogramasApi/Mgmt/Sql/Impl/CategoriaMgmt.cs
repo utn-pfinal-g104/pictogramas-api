@@ -25,7 +25,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             try
             {
                 string result = String.Join(",", categorias.Select(c => "('" + c.Nombre + "')"));
-                string insert = $"insert into categorias (nombre) values {result}";
+                string insert = $"insert into Categorias (nombre) values {result}";
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
@@ -56,6 +56,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 });
             }
             catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Categoria>> ObtenerCategorias()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var categorias = (await connection.GetListAsync<Categoria>()).ToList();
+                    connection.Close();
+                    return categorias;
+                }
+            }
+            catch (Exception ex)
             {
                 throw ex;
             }

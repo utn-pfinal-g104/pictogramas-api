@@ -7,5 +7,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     public interface ITagMgmt
     {
         Task AgregarTags(List<Tag> tags);
+        Task<List<Tag>> ObtenerTags();
     }
 }

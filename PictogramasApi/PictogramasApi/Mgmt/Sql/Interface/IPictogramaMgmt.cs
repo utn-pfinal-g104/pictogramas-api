@@ -8,5 +8,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     {
         Task<Pictograma> ObtenerPictogramaPorPalabra(string palabra);
         Task AgregarPictogramas(List<Pictograma> pictogramas);
+        Task<List<Pictograma>> ObtenerPictogramas();
     }
 }

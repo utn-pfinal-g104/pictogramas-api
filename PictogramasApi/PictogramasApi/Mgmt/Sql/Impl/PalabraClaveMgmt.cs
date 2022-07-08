@@ -1,10 +1,13 @@
-﻿using DapperExtensions;
+﻿using Dapper;
+using DapperExtensions;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PictogramasApi.Mgmt.Sql.Impl
@@ -22,11 +25,32 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             try
             {
-                using (IDbConnection connection = _context.CreateConnection())
+                int cantidadDeInserts = palabrasClaves.Count() / 1000 + 1;
+
+                List<PalabraClave> keywordsRecortadas = new List<PalabraClave>();
+                for(int i=0; i< cantidadDeInserts; i++)
                 {
-                    connection.Open();
-                    await connection.InsertAsync(palabrasClaves);
-                    connection.Close();
+                    keywordsRecortadas = palabrasClaves.Skip(i * 1000).Take(1000).ToList();
+                    string result = String.Join(",", keywordsRecortadas.Select(p =>
+                        "('" + p.Keyword + "',"
+                        + p.Tipo + ",'"
+                        + p.Meaning + "','"
+                        + p.Plural + "',"
+                        + (p.HasLocution ? 1 : 0) + ","
+                        + p.IdPictograma + ")"
+                    ));
+                    string insert = $"insert into Keywords (Keyword,Tipo,Meaning,Plural,HasLocution,IdPictograma) values {result}";
+                    //insert = insert.Replace(",'.", ",'");
+                    //insert = insert.Replace(".'", "'");
+                    //insert = insert.Replace("'.", "'");
+                    //insert = insert.Replace("..", "");
+                    using (IDbConnection connection = _context.CreateConnection())
+                    {
+                        connection.Open();
+                        await Task.Run(() => connection.Execute(insert));
+                        //await connection.InsertAsync(palabrasClaves);
+                        connection.Close();
+                    }
                 }
             }
             catch (Exception ex)

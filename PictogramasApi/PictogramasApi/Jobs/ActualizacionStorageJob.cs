@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PictogramasApi.Jobs
@@ -49,7 +50,7 @@ namespace PictogramasApi.Jobs
         internal async void ActualizarPictogramas()
         {
             // Dejo esto hasta que el metodo este finalizado
-            //throw new NotImplementedException();
+            throw new NotImplementedException();
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 
@@ -58,13 +59,20 @@ namespace PictogramasApi.Jobs
             List<Tag> tags = ObtenerTags(pictogramasArasaac);
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
-            //await _categoriaMgmt.AgregarCategorias(categorias); // Implementado
-            await _tagMgmt.AgregarTags(tags);
-            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
-            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
+            //await _categoriaMgmt.AgregarCategorias(categorias); 
+            //await _tagMgmt.AgregarTags(tags);
+            //await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
-            List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categorias, pictogramas, pictogramasArasaac);
-            List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tags, pictogramas, pictogramasArasaac);
+            var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas();
+            foreach(var keyword in palabrasClaves)
+                keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;            
+            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+
+            // Pendiente
+            List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias(); 
+            List<Tag> tagsNuestras = await _tagMgmt.ObtenerTags();
+            List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
+            List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tagsNuestras, pictogramasNuestros, pictogramasArasaac);
 
             await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
             await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
@@ -102,11 +110,12 @@ namespace PictogramasApi.Jobs
             {
                 foreach (var tag in pictograma.tags)
                 {
-                    picsXtags.Add(new PictogramaPorTag
-                    {
-                        IdTag = tags.FirstOrDefault(t => t.Nombre == tag).Id,
-                        IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
-                    });
+                    if (tag != null)
+                        picsXtags.Add(new PictogramaPorTag
+                        {
+                            IdTag = tags.FirstOrDefault(t => t.Nombre == tag).Id,
+                            IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                        });
                 }
             }
             return picsXtags;
@@ -142,9 +151,9 @@ namespace PictogramasApi.Jobs
                     { 
                         HasLocution = palabraClave.hasLocution,
                         IdPictograma = pictograma._id,
-                        Keyword = palabraClave.keyword,
-                        Meaning = palabraClave.meaning,
-                        Plural = palabraClave.plural,
+                        Keyword = palabraClave.keyword != null ? String.Join("", palabraClave.keyword.Split(',', '\'', '"','@')) : "",
+                        Meaning = palabraClave.meaning != null ? String.Join("", Regex.Replace(palabraClave.meaning, @"\t|\n|\r", "").Split(',', '\'', '"', '@')) : "",
+                        Plural = palabraClave.plural != null ? String.Join("", palabraClave.plural.Split(',', '\'', '"', '@')) : "",
                         Tipo = palabraClave.type
                     });
             }
