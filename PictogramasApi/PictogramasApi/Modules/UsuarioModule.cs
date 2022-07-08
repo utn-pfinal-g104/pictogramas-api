@@ -1,6 +1,8 @@
 ﻿using Carter;
+using Carter.Request;
 using Carter.Response;
 using PictogramasApi.Mgmt.Sql.Interface;
+using PictogramasApi.Model;
 using System;
 
 namespace PictogramasApi.Modules
@@ -14,6 +16,7 @@ namespace PictogramasApi.Modules
             _usuarioMgmt = usuarioMgmt;
 
             GetUsuarios();
+            GetUsuarioPorId();
             GetUsuarioPorNombre();
             PostUsuario();
             PatchUsuario();
@@ -28,6 +31,26 @@ namespace PictogramasApi.Modules
             });
         }
 
+        private void GetUsuarioPorId()
+        {
+
+            Get("/usuarios/{id:int}", async (ctx) => 
+            {
+                var id = ctx.Request.RouteValues.As<int>("id");
+                try
+                {                    
+                    Usuario usuario = await _usuarioMgmt.GetUsuario(id);
+                    await ctx.Response.Negotiate(usuario);
+                }
+                catch (Exception ex)
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.AsJson(ex.Message);
+                }
+                
+            });
+        }
+
         private void GetUsuarioPorNombre()
         {
 
@@ -35,7 +58,10 @@ namespace PictogramasApi.Modules
 
         private void PostUsuario()
         {
-
+            //Post("/usuarios", async (ctx) =>
+            //{
+               
+            //});
         }
 
         private void PatchUsuario()
