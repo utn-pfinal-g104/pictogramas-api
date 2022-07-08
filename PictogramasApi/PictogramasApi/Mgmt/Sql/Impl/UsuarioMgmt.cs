@@ -1,4 +1,6 @@
-﻿using DapperExtensions;
+﻿using Dapper;
+using DapperExtensions;
+using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -39,6 +41,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
+        public async Task<Usuario> GetUsuario(int id)
+        {
+            return await Task.Run(async () =>
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();                        
+                    var usuario = connection.Query<Usuario>("SELECT * FROM Usuarios WHERE Id=@Id", new { Id = id }).FirstOrDefault();
+                    connection.Close();
+                    if (usuario == null)
+                    {
+                        throw new Exception($"No se encontro usuario con id {id}");
+                    }
+                    return usuario;
+                }
+            });
+            
+        }
 
     }
 }

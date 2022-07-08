@@ -8,5 +8,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     public interface IUsuarioMgmt
     {
         Task<List<Usuario>> GetUsuarios();
+        Task<Usuario> GetUsuario(int id);
     }
 }
