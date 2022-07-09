@@ -40,15 +40,10 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                         + p.IdPictograma + ")"
                     ));
                     string insert = $"insert into Keywords (Keyword,Tipo,Meaning,Plural,HasLocution,IdPictograma) values {result}";
-                    //insert = insert.Replace(",'.", ",'");
-                    //insert = insert.Replace(".'", "'");
-                    //insert = insert.Replace("'.", "'");
-                    //insert = insert.Replace("..", "");
                     using (IDbConnection connection = _context.CreateConnection())
                     {
                         connection.Open();
                         await Task.Run(() => connection.Execute(insert));
-                        //await connection.InsertAsync(palabrasClaves);
                         connection.Close();
                     }
                 }
