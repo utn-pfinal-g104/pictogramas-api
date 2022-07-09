@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Carter.ModelBinding;
 using Carter.Request;
 using Carter.Response;
 using PictogramasApi.Mgmt.Sql.Interface;
@@ -33,7 +34,6 @@ namespace PictogramasApi.Modules
 
         private void GetUsuarioPorId()
         {
-
             Get("/usuarios/{id:int}", async (ctx) => 
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
@@ -46,27 +46,50 @@ namespace PictogramasApi.Modules
                 {
                     ctx.Response.StatusCode = 404;
                     await ctx.Response.AsJson(ex.Message);
-                }
-                
+                }                
             });
         }
 
         private void GetUsuarioPorNombre()
         {
-
+            Get("/usuarios/{username:minlength(1)}", async (ctx) =>
+            {
+                var username = ctx.Request.RouteValues.As<string>("username");
+                try
+                {
+                    Usuario usuario = await _usuarioMgmt.GetUsuario(username);
+                    await ctx.Response.Negotiate(usuario);
+                }
+                catch (Exception ex)
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.AsJson(ex.Message);
+                }
+            });
         }
 
         private void PostUsuario()
         {
-            //Post("/usuarios", async (ctx) =>
-            //{
-               
-            //});
+            Post("/usuarios", async (ctx) =>
+            {
+                var usuario = await ctx.Request.Bind<Usuario>();
+                // TODO: Encriptar / hashear password
+                await _usuarioMgmt.CrearUsuario(usuario);
+                ctx.Response.StatusCode = 201;
+                await ctx.Response.AsJson("Usuario creado");
+            });
         }
 
         private void PatchUsuario()
         {
-
+            Patch("/usuarios", async (ctx) =>
+            {
+                var usuario = await ctx.Request.Bind<Usuario>();
+                // TODO: Encriptar / hashear password
+                await _usuarioMgmt.ActualizarUsuario(usuario);
+                ctx.Response.StatusCode = 201;
+                await ctx.Response.AsJson("Usuario creado");
+            });
         }
     }
 }

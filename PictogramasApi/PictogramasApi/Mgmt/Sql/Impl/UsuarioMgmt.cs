@@ -60,5 +60,59 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             
         }
 
+        public async Task CrearUsuario(Usuario usuario)
+        {
+            try
+            { 
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var categorias = await connection.InsertAsync(usuario);
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<Usuario> GetUsuario(string username)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+                    //TODO: La palabra asociada al pictograma se encuentra en la tabla keywords, por lo cual requiere joinear
+                    pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.NombreUsuario, Operator.Eq, username));
+                    var usuario = await connection.GetAsync<Usuario>(pgAnd);
+                    connection.Close();
+                    return usuario;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task ActualizarUsuario(Usuario usuario)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var categorias = await connection.UpdateAsync(usuario);
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

@@ -9,5 +9,8 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     {
         Task<List<Usuario>> GetUsuarios();
         Task<Usuario> GetUsuario(int id);
+        Task CrearUsuario(Usuario usuario);
+        Task<Usuario> GetUsuario(string username);
+        Task ActualizarUsuario(Usuario usuario);
     }
 }
