@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace PictogramasApi.Model
 {
     public class Usuario
     {
-        public int Id { get; set; }
+        // Es int64 porque sino fallaba dapper extensions con el insert async
+        public Int64 Id { get; set; }
         public string NombreUsuario { get; set; }
         public string Password { get; set; }
         public bool Schematic { get; set; }
