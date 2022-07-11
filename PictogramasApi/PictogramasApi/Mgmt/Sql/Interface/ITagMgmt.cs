@@ -8,5 +8,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     {
         Task AgregarTags(List<Tag> tags);
         Task<List<Tag>> ObtenerTags();
+        Task<Tag> ObtenerTag(string nombre);
     }
 }

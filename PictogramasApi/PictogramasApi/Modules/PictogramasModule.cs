@@ -22,6 +22,7 @@ namespace PictogramasApi.Modules
         private readonly IPictogramaPorTagMgmt _pictogramaPorTagMgmt;
         private readonly IPalabraClaveMgmt _palabraClaveMgmt;
         private readonly ICategoriaMgmt _categoriaMgmt;
+        private readonly ITagMgmt _tagMgmt;
 
         private readonly ActualizacionStorageJob _actualizacionStorageJob;
         private readonly ArasaacService _arasaacService;
@@ -29,7 +30,7 @@ namespace PictogramasApi.Modules
         public PictogramasModule(ArasaacService arasaacService, IPictogramaMgmt pictogramaMgmt, 
             IStorageMgmt storageMgmt, ActualizacionStorageJob actualizacionStorageJob, ICategoriaMgmt categoriaMgmt,
             IPictogramaPorTagMgmt pictogramaPorTagMgmt, IPalabraClaveMgmt palabraClaveMgmt,
-            IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt) : base("/pictogramas")
+            IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt, ITagMgmt tagMgmt) : base("/pictogramas")
         {
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
@@ -39,6 +40,7 @@ namespace PictogramasApi.Modules
             _pictogramaPorTagMgmt = pictogramaPorTagMgmt;
             _palabraClaveMgmt = palabraClaveMgmt;
             _categoriaMgmt = categoriaMgmt;
+            _tagMgmt = tagMgmt;
 
             #region "Arasaac"
             GetPictogramaPorIdDeArasaac();
@@ -51,6 +53,8 @@ namespace PictogramasApi.Modules
             GetPictogramaPorKeyword();
             GetPictogramasPorNombreCategoria();
             GetPictogramasPorCategoriaId();
+            GetPictogramasPorNombreDeTag();
+            GetPictogramasPorTagId();
 
             DeletePictogramaDelStorage();
             #endregion "Storage"
@@ -188,10 +192,39 @@ namespace PictogramasApi.Modules
             });
         }
 
+        private void GetPictogramasPorNombreDeTag()
+        {
+            Get("/tags/nombre/{nombre:minlength(1)}", async (ctx) =>
+            {
+                var nombre = ctx.Request.RouteValues.As<string>("nombre");
+
+                var tag = await _tagMgmt.ObtenerTag(nombre);
+                await ObtenerPictogramasPorTagId(ctx, tag.Id);
+            });
+        }
+
+        private void GetPictogramasPorTagId()
+        {
+            Get("/tags/id/{tag:int}", async (ctx) =>
+            {
+                var tag = ctx.Request.RouteValues.As<int>("tag");
+
+                await ObtenerPictogramasPorTagId(ctx, tag);
+            });
+        }
+
         private async Task ObtenerPictogramasPorCategoriaId(HttpContext ctx, int categoria)
         {
             var picsXcat = await _pictogramaPorCategoriaMgmt.ObtenerPictogramasPorCategoria(categoria);
             var pictogramasIds = picsXcat.Select(p => p.IdPictograma).ToList();
+
+            await ObtenerPictogramasPorIds(ctx, pictogramasIds);
+        }
+
+        private async Task ObtenerPictogramasPorTagId(HttpContext ctx, int tag)
+        {
+            var picsXtag = await _pictogramaPorTagMgmt.ObtenerPictogramasPorTag(tag);
+            var pictogramasIds = picsXtag.Select(p => p.IdPictograma).ToList();
 
             await ObtenerPictogramasPorIds(ctx, pictogramasIds);
         }
