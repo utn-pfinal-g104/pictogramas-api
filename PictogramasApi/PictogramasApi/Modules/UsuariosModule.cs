@@ -8,11 +8,11 @@ using System;
 
 namespace PictogramasApi.Modules
 {
-    public class UsuarioModule : CarterModule
+    public class UsuariosModule : CarterModule
     {
         private readonly IUsuarioMgmt _usuarioMgmt;
 
-        public UsuarioModule(IUsuarioMgmt usuarioMgmt)
+        public UsuariosModule(IUsuarioMgmt usuarioMgmt) : base("/usuarios")
         {
             _usuarioMgmt = usuarioMgmt;
 

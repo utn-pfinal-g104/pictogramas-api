@@ -8,5 +8,7 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     public interface IPalabraClaveMgmt
     {
         Task AgregarPalabrasClaves(List<PalabraClave> palabrasClaves);
+        Task<List<PalabraClave>> ObtenerKeywords();
+        Task<PalabraClave> ObtenerKeyword(string palabra);
     }
 }

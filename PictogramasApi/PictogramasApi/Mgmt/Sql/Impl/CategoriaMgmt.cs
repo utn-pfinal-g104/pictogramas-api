@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using DapperExtensions;
+using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -56,6 +57,26 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 });
             }
             catch(Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<Categoria> ObtenerCategoria(string nombre)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Categoria>(c => c.Nombre, Operator.Eq, nombre));
+                    var categoria = (await connection.GetListAsync<Categoria>(pgAnd)).FirstOrDefault();
+                    connection.Close();
+                    return categoria;
+                }
+            }
+            catch (Exception ex)
             {
                 throw ex;
             }

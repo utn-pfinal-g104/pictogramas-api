@@ -1,71 +1,64 @@
 ﻿using Carter;
 using Carter.Request;
 using Carter.Response;
+using Microsoft.AspNetCore.Http;
 using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
-using PictogramasApi.Mgmt.NoSql;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Services;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Mime;
+using System.Threading.Tasks;
 
 namespace PictogramasApi.Modules
 {
     public class PictogramasModule : CarterModule
     {
-        private readonly INeo4JMgmt _neo4JMgmt;
-        private readonly ICategoriaMgmt _categoriaMgmt;
         private readonly IPictogramaMgmt _pictogramaMgmt;
         private readonly IStorageMgmt _storageMgmt;
+        private readonly IPictogramaPorCategoriaMgmt _pictogramaPorCategoriaMgmt;
+        private readonly IPictogramaPorTagMgmt _pictogramaPorTagMgmt;
+        private readonly IPalabraClaveMgmt _palabraClaveMgmt;
+        private readonly ICategoriaMgmt _categoriaMgmt;
 
         private readonly ActualizacionStorageJob _actualizacionStorageJob;
         private readonly ArasaacService _arasaacService;
 
-        public PictogramasModule(INeo4JMgmt neo4JMgmt, ICategoriaMgmt categoriaMgmt, ArasaacService arasaacService,
-            IPictogramaMgmt pictogramaMgmt, IStorageMgmt storageMgmt,ActualizacionStorageJob actualizacionStorageJob)
+        public PictogramasModule(ArasaacService arasaacService, IPictogramaMgmt pictogramaMgmt, 
+            IStorageMgmt storageMgmt, ActualizacionStorageJob actualizacionStorageJob, ICategoriaMgmt categoriaMgmt,
+            IPictogramaPorTagMgmt pictogramaPorTagMgmt, IPalabraClaveMgmt palabraClaveMgmt,
+            IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt) : base("/pictogramas")
         {
-            _neo4JMgmt = neo4JMgmt;
-            _categoriaMgmt = categoriaMgmt;
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
             _actualizacionStorageJob = actualizacionStorageJob;
             _arasaacService = arasaacService;
+            _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
+            _pictogramaPorTagMgmt = pictogramaPorTagMgmt;
+            _palabraClaveMgmt = palabraClaveMgmt;
+            _categoriaMgmt = categoriaMgmt;
 
-            GetRelaciones();
-            GetCategorias();
-            GetPictogramaPorId();
-            GetPictogramaPorNombre();
-
+            #region "Arasaac"
+            GetPictogramaPorIdDeArasaac();
             GetPictogramaPorIdYGuardarlo();
             GetPictogramasDeArasaacYGuardarlos();
+            #endregion "Arasaac"
 
-            GetPictogramaDelStorage();            
+            #region "Storage"
+            GetPictogramaDelStorage();
+            GetPictogramaPorKeyword();
+            GetPictogramasPorNombreCategoria();
+            GetPictogramasPorCategoriaId();
 
             DeletePictogramaDelStorage();
-        }
-
-        private void GetRelaciones()
-        {
-            Get("/", async (ctx) =>
-            {
-                var pictograma = await _neo4JMgmt.ObtenerPictograma(1);
-                await ctx.Response.Negotiate("Funciona");
-            });
-        }
-
-        private void GetCategorias()
-        {
-            Get("/categorias", async (ctx) =>
-            {
-                var categorias = await _categoriaMgmt.GetCategorias();
-                await ctx.Response.Negotiate(categorias);
-            });
+            #endregion "Storage"
         }
 
         private void GetPictogramasDeArasaacYGuardarlos()
         {
-            Get("/pictogramas/guardar", async (ctx) =>
+            Get("/guardar", async (ctx) =>
             {
                 //TODO: Cuando esto se implemente, el resto desaparece
                 _actualizacionStorageJob.ActualizarPictogramas();
@@ -87,9 +80,9 @@ namespace PictogramasApi.Modules
             });
         }
 
-        private void GetPictogramaPorId()
+        private void GetPictogramaPorIdDeArasaac()
         {
-            Get("/pictogramas/{id:int}", async (ctx) =>
+            Get("/{id:int}", async (ctx) =>
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
@@ -108,7 +101,7 @@ namespace PictogramasApi.Modules
 
         private void GetPictogramaPorIdYGuardarlo()
         {
-            Get("/pictogramas/{id:int}/guardar", async (ctx) =>
+            Get("/{id:int}/guardar", async (ctx) =>
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
 
@@ -127,7 +120,7 @@ namespace PictogramasApi.Modules
 
         private void GetPictogramaDelStorage()
         {
-            Get("/pictogramas/{filename:minlength(1)}/obtener", async (ctx) =>
+            Get("/{filename:minlength(1)}/obtener", async (ctx) =>
             {
                 var filename = ctx.Request.RouteValues.As<string>("filename");
 
@@ -145,7 +138,7 @@ namespace PictogramasApi.Modules
 
         private void DeletePictogramaDelStorage()
         {
-            Delete("/pictogramas/{filename:minlength(1)}", async (ctx) =>
+            Delete("/{filename:minlength(1)}", async (ctx) =>
             {
                 var filename = ctx.Request.RouteValues.As<string>("filename");
 
@@ -154,25 +147,65 @@ namespace PictogramasApi.Modules
             });
         }
 
-        private void GetPictogramaPorNombre()
+        private void GetPictogramaPorKeyword()
         {
-            Get("/pictogramas/nombre/{palabra:minlength(1)}", async (ctx) =>
+            Get("/nombre/{palabra:minlength(1)}", async (ctx) =>
             {
                 var palabra = ctx.Request.RouteValues.As<string>("palabra");
 
-                var pictograma = await _pictogramaMgmt.ObtenerPictogramaPorPalabra(palabra);
+                var keyword = await _palabraClaveMgmt.ObtenerKeyword(palabra);               
 
-                var pictogramaArasaac = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma.IdArasaac);
+                var pictograma = _storageMgmt.Obtener(keyword.IdPictograma.ToString());
 
-                if (pictogramaArasaac != null)
+                if (pictograma != null)
                 {
-
-                    await ctx.Response.FromStream(pictogramaArasaac, $"image/png",
+                    await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
                 }
                 else
                     await ctx.Response.Negotiate("Error obteniendo el pictograma");
             });
+        }
+
+        private void GetPictogramasPorNombreCategoria()
+        {
+            Get("/categorias/nombre/{nombre:minlength(1)}", async (ctx) =>
+            {
+                var nombre = ctx.Request.RouteValues.As<string>("nombre");
+
+                var categoria = await _categoriaMgmt.ObtenerCategoria(nombre);
+                await ObtenerPictogramasPorCategoriaId(ctx, categoria.Id);
+            });
+        }
+
+        private void GetPictogramasPorCategoriaId()
+        {
+            Get("/categorias/id/{categoria:int}", async (ctx) =>
+            {
+                var categoria = ctx.Request.RouteValues.As<int>("categoria");
+
+                await ObtenerPictogramasPorCategoriaId(ctx, categoria);
+            });
+        }
+
+        private async Task ObtenerPictogramasPorCategoriaId(HttpContext ctx, int categoria)
+        {
+            var picsXcat = await _pictogramaPorCategoriaMgmt.ObtenerPictogramasPorCategoria(categoria);
+            var pictogramasIds = picsXcat.Select(p => p.IdPictograma).ToList();
+
+            await ObtenerPictogramasPorIds(ctx, pictogramasIds);
+        }
+
+        private async Task ObtenerPictogramasPorIds(HttpContext ctx, List<int> pictogramasIds)
+        {
+            var pictogramas = await _pictogramaMgmt.ObtenerPictogramas(pictogramasIds);
+
+            if (pictogramas != null)
+            {
+                await ctx.Response.Negotiate(pictogramas);
+            }
+            else
+                await ctx.Response.Negotiate("Error obteniendo el pictograma");
         }
     }
 }

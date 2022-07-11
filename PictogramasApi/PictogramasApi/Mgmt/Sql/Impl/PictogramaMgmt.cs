@@ -58,30 +58,6 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
-        public async Task<Pictograma> ObtenerPictogramaPorPalabra(string palabra)
-        {
-            try
-            {
-                return await Task.Run(async () =>
-                {
-                    using (IDbConnection connection = _context.CreateConnection())
-                    {
-                        connection.Open();
-                        var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
-                        //TODO: La palabra asociada al pictograma se encuentra en la tabla keywords, por lo cual requiere joinear
-                        pgAnd.Predicates.Add(Predicates.Field<Pictograma>(p => p.Hair.ToString(), Operator.Eq, palabra)); 
-                        var pictograma = await connection.GetAsync<Pictograma>(pgAnd);
-                        connection.Close();
-                        return pictograma;
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
         public async Task<List<Pictograma>> ObtenerPictogramas()
         {
             try
@@ -92,6 +68,33 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     var pictogramas = (await connection.GetListAsync<Pictograma>()).ToList();
                     connection.Close();
                     return pictogramas;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Pictograma>> ObtenerPictogramas(List<int> pictogramasIds)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var sql = $"SELECT p.*, k.* from Pictogramas p JOIN Keywords k on p.id = k.IdPictograma WHERE p.id in ({string.Join(",", pictogramasIds)})";
+                    var pictogramas = await connection.QueryAsync<Pictograma, PalabraClave, Pictograma>(sql, (pictograma, keyword) => {
+                        if (pictograma.Keywords != null)
+                            pictograma.Keywords.Add(keyword);
+                        else
+                            pictograma.Keywords = new List<PalabraClave> { keyword };
+                        return pictograma;
+                    },
+                    splitOn: "Id");
+
+                    connection.Close();
+                    return pictogramas.ToList();
                 }
             }
             catch (Exception ex)

@@ -8,5 +8,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     public interface IPictogramaPorCategoriaMgmt
     {
         Task AgregarRelaciones(List<PictogramaPorCategoria> picsXcats);
+        Task<List<PictogramaPorCategoria>> ObtenerPictogramasPorCategoria(int categoria);
     }
 }
