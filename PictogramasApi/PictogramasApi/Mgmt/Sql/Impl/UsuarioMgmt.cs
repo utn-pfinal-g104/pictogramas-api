@@ -105,7 +105,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var categorias = await connection.UpdateAsync(usuario);
+                    await connection.UpdateAsync(usuario);
                     connection.Close();
                 }
             }

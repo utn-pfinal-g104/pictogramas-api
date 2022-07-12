@@ -25,7 +25,7 @@ namespace PictogramasApi.Modules
 
         private void GetUsuarios()
         {
-            Get("/usuarios", async (ctx) =>
+            Get("/", async (ctx) =>
             {
                 var usuarios = await _usuarioMgmt.GetUsuarios();
                 await ctx.Response.Negotiate(usuarios);
@@ -34,7 +34,7 @@ namespace PictogramasApi.Modules
 
         private void GetUsuarioPorId()
         {
-            Get("/usuarios/{id:int}", async (ctx) => 
+            Get("/{id:int}", async (ctx) => 
             {
                 var id = ctx.Request.RouteValues.As<int>("id");
                 try
@@ -52,7 +52,7 @@ namespace PictogramasApi.Modules
 
         private void GetUsuarioPorNombre()
         {
-            Get("/usuarios/{username:minlength(1)}", async (ctx) =>
+            Get("/{username:minlength(1)}", async (ctx) =>
             {
                 var username = ctx.Request.RouteValues.As<string>("username");
                 try
@@ -70,7 +70,7 @@ namespace PictogramasApi.Modules
 
         private void PostUsuario()
         {
-            Post("/usuarios", async (ctx) =>
+            Post("/", async (ctx) =>
             {
                 var usuario = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
@@ -82,7 +82,7 @@ namespace PictogramasApi.Modules
 
         private void PatchUsuario()
         {
-            Patch("/usuarios", async (ctx) =>
+            Patch("/", async (ctx) =>
             {
                 var usuario = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
