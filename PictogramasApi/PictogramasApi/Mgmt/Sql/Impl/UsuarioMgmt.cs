@@ -60,7 +60,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             
         }
 
-        public async Task CrearUsuario(Usuario usuario)
+        public async Task<Usuario> CrearUsuario(Usuario usuario)
         {
             try
             { 
@@ -69,6 +69,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     await connection.InsertAsync<Usuario>(usuario);
                     connection.Close();
+                    return usuario;
                 }
             }
             catch (Exception ex)
@@ -77,7 +78,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task<Usuario> GetUsuario(string username)
+        public async Task<Usuario> GetUsuario(string username, string password)
         {
             try
             {
@@ -87,7 +88,8 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     //TODO: La palabra asociada al pictograma se encuentra en la tabla keywords, por lo cual requiere joinear
                     pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.NombreUsuario, Operator.Eq, username));
-                    var usuario = await connection.GetAsync<Usuario>(pgAnd);
+                    pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.Password, Operator.Eq, password));
+                    Usuario usuario = (await connection.GetListAsync<Usuario>(pgAnd)).FirstOrDefault();
                     connection.Close();
                     return usuario;
                 }

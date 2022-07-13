@@ -18,7 +18,7 @@ namespace PictogramasApi.Modules
 
             GetUsuarios();
             GetUsuarioPorId();
-            GetUsuarioPorNombre();
+            GetUsuarioPorUsernameYPassword();
             PostUsuario();
             PatchUsuario();
         }
@@ -50,14 +50,15 @@ namespace PictogramasApi.Modules
             });
         }
 
-        private void GetUsuarioPorNombre()
+        private void GetUsuarioPorUsernameYPassword()
         {
-            Get("/{username:minlength(1)}", async (ctx) =>
+            Get("/{username:minlength(1)}/{password:minlength(1)}", async (ctx) =>
             {
                 var username = ctx.Request.RouteValues.As<string>("username");
+                var password = ctx.Request.RouteValues.As<string>("password");
                 try
                 {
-                    Usuario usuario = await _usuarioMgmt.GetUsuario(username);
+                    Usuario usuario = await _usuarioMgmt.GetUsuario(username, password);
                     await ctx.Response.Negotiate(usuario);
                 }
                 catch (Exception ex)
@@ -72,11 +73,15 @@ namespace PictogramasApi.Modules
         {
             Post("/", async (ctx) =>
             {
-                var usuario = await ctx.Request.Bind<Usuario>();
+                var usuarioRequest = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
-                await _usuarioMgmt.CrearUsuario(usuario);
+                // Verificamos si ya existe
+                Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, usuarioRequest.Password);
+                if (usuario == null)
+                    usuario = await _usuarioMgmt.CrearUsuario(usuarioRequest);
+
                 ctx.Response.StatusCode = 201;
-                await ctx.Response.AsJson("Usuario creado");
+                await ctx.Response.AsJson(usuario);
             });
         }
 
