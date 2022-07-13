@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace PictogramasApi.Model
 {
@@ -18,5 +19,9 @@ namespace PictogramasApi.Model
         public List<Categoria> Categorias { get; set; }
         public List<Tag> Tags { get; set; }
         public List<PalabraClave> Keywords { get; set; }
+
+        // Ver si usamos para agilizar
+        public Stream Imagen { get; set; }
+        public Stream ImagenBase64 { get; set; }
     }
 }

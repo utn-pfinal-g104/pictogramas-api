@@ -6,6 +6,8 @@ using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Services;
+using PictogramasApi.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -227,6 +229,17 @@ namespace PictogramasApi.Modules
 
             if (pictogramas != null)
             {
+                //foreach (var pictograma in pictogramas)
+                //{
+                //    try
+                //    {
+                //        pictograma.ImagenBase64 = Parser.ConvertToBase64(_storageMgmt.Obtener(pictograma.Id.ToString()));
+                //    }
+                //    catch (Exception)
+                //    {
+
+                //    }
+                //}
                 await ctx.Response.Negotiate(pictogramas);
             }
             else
