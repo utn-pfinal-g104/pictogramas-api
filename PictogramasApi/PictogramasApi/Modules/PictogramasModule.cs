@@ -64,23 +64,8 @@ namespace PictogramasApi.Modules
         {
             Get("/guardar", async (ctx) =>
             {
-                //TODO: Cuando esto se implemente, el resto desaparece
                 _actualizacionStorageJob.ActualizarPictogramas();
-
-                var pictogramas = await _arasaacService.ObtenerPictogramasDeArasaac();
-
-                if (pictogramas != null)
-                {
-                    List<Stream> pictogramasAsStreams = new List<Stream>();
-                    foreach(var pictograma in pictogramas)
-                    {
-                        var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
-                        pictogramasAsStreams.Add(pictogramaAsStream);
-                    }
-                    await ctx.Response.Negotiate(pictogramas);
-                }
-                else
-                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+                await ctx.Response.Negotiate("Pictogramas actualizados");
             });
         }
 
@@ -94,7 +79,6 @@ namespace PictogramasApi.Modules
 
                 if (pictograma != null)
                 {
-
                     await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
                 }
@@ -118,7 +102,10 @@ namespace PictogramasApi.Modules
                         new ContentDisposition($"attachment;filename=pictograma.png"));
                 }
                 else
-                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.Negotiate("No existe el pictograma");
+                }
             });
         }
 
@@ -131,12 +118,15 @@ namespace PictogramasApi.Modules
                 var pictograma = _storageMgmt.Obtener(filename);
 
                 if (pictograma != null)
-                {                    
+                {
                     await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
                 }
                 else
-                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.Negotiate("No existe el pictograma");
+                }
             });
         }
 
@@ -157,17 +147,19 @@ namespace PictogramasApi.Modules
             {
                 var palabra = ctx.Request.RouteValues.As<string>("palabra");
 
-                var keyword = await _palabraClaveMgmt.ObtenerKeyword(palabra);               
+                var keyword = await _palabraClaveMgmt.ObtenerKeyword(palabra);
 
-                var pictograma = _storageMgmt.Obtener(keyword.IdPictograma.ToString());
-
-                if (pictograma != null)
+                if (keyword != null)
                 {
+                    var pictograma = _storageMgmt.Obtener(keyword.IdPictograma.ToString());
                     await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
                 }
                 else
-                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.Negotiate("No existe pictograma asociado a esa palabra");
+                }
             });
         }
 

@@ -60,18 +60,18 @@ namespace PictogramasApi.Jobs
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
             // INSERT CATEGORIAS
-            //await _categoriaMgmt.AgregarCategorias(categorias); 
+            await _categoriaMgmt.AgregarCategorias(categorias); 
             // INSERT TAGS
-            //await _tagMgmt.AgregarTags(tags);
+            await _tagMgmt.AgregarTags(tags);
             // INSERT PICTOGRAMAS
-            //await _pictogramaMgmt.AgregarPictogramas(pictogramas);
+            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas();
             foreach(var keyword in palabrasClaves)
                 keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;            
             
             // INSERT KEYWORDS
-            //await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
 
             // Pendiente
             List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias(); 
@@ -80,16 +80,15 @@ namespace PictogramasApi.Jobs
             List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tagsNuestras, pictogramasNuestros, pictogramasArasaac);
 
             // INSERT PICTOGRAMAS X CATEGORIAS
-            //await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
+            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
             // INSERT PICTOGRAMAS POR TAGS
-            //await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
+            await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
 
             List<Stream> pictogramasAsStreams = new List<Stream>();
             foreach (var pictograma in pictogramasArasaac)
             {
                 var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
                 _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos?
-                //pictogramasAsStreams.Add(pictogramaAsStream);
             }
         }
 
