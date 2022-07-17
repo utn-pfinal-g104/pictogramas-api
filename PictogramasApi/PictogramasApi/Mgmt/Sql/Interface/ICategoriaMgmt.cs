@@ -10,5 +10,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         Task AgregarCategorias(List<Categoria> categorias);
         Task<List<Categoria>> ObtenerCategorias();
         Task<Categoria> ObtenerCategoria(string nombre);
+        Task<int> ObtenerTotalCategorias();
     }
 }

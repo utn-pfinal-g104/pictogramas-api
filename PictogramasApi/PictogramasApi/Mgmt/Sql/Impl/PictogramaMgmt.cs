@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -95,6 +94,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
 
                     connection.Close();
                     return pictogramas.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<int> ObtenerTotalPictogramas()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pictogramas = await connection.CountAsync<Pictograma>();
+                    connection.Close();
+                    return pictogramas;
                 }
             }
             catch (Exception ex)

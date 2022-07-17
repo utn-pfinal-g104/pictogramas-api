@@ -57,6 +57,7 @@ namespace PictogramasApi.Modules
             GetPictogramasPorCategoriaId();
             GetPictogramasPorNombreDeTag();
             GetPictogramasPorTagId();
+            GetTotalPictogramas();
 
             DeletePictogramaDelStorage();
             #endregion "Storage"
@@ -68,6 +69,15 @@ namespace PictogramasApi.Modules
             {
                 _actualizacionStorageJob.ActualizarPictogramas();
                 await ctx.Response.Negotiate("Pictogramas actualizados");
+            });
+        }
+
+        private void GetTotalPictogramas()
+        {
+            Get("/total", async (ctx) =>
+            {
+                int total = await _pictogramaMgmt.ObtenerTotalPictogramas();
+                await ctx.Response.Negotiate(total);
             });
         }
 
