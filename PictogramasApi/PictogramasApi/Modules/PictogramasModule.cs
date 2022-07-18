@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
+using PictogramasApi.Model;
 using PictogramasApi.Services;
 using PictogramasApi.Utils;
 using System;
@@ -50,6 +51,11 @@ namespace PictogramasApi.Modules
             GetPictogramasDeArasaacYGuardarlos();
             #endregion "Arasaac"
 
+            #region "BD"
+            GetTotalPictogramas();
+            GetInformacionPictogramas();
+            #endregion "BD"
+
             #region "Storage"
             GetPictogramaDelStorage();
             GetPictogramaPorKeyword();
@@ -57,10 +63,18 @@ namespace PictogramasApi.Modules
             GetPictogramasPorCategoriaId();
             GetPictogramasPorNombreDeTag();
             GetPictogramasPorTagId();
-            GetTotalPictogramas();
 
             DeletePictogramaDelStorage();
             #endregion "Storage"
+        }
+
+        private void GetInformacionPictogramas()
+        {
+            Get("/informacion", async (ctx) =>
+            {
+                List<Pictograma> pictogramas = await _pictogramaMgmt.ObtenerInformacionPictogramas();                
+                await ctx.Response.Negotiate(pictogramas);
+            });
         }
 
         private void GetPictogramasDeArasaacYGuardarlos()
@@ -235,7 +249,7 @@ namespace PictogramasApi.Modules
 
         private async Task ObtenerPictogramasPorIds(HttpContext ctx, List<int> pictogramasIds)
         {
-            var pictogramas = await _pictogramaMgmt.ObtenerPictogramas(pictogramasIds);
+            var pictogramas = await _pictogramaMgmt.ObtenerPictogramasPorIds(pictogramasIds);
 
             if (pictogramas != null)
             {

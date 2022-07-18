@@ -57,6 +57,65 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public async Task<List<Pictograma>> ObtenerInformacionPictogramas()
+        {
+            try
+            {
+                var pics = await ObtenerPictogramas();
+
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag)";
+                    var pictogramas = await connection.QueryAsync<Pictograma, PictogramaPorCategoria, PictogramaPorTag, PalabraClave, Categoria, Tag, Pictograma>(sql, (p, pc, pt, k, c, t) => {
+                        var picto = pics.FirstOrDefault(pic => pic.Id == p.Id);
+                        if (c != null)
+                        {
+                            if (picto.Categorias != null)
+                            {
+                                if (!picto.Categorias.Any(cat => cat.Id == c.Id))
+                                    picto.Categorias.Add(c);
+                            }
+                            else
+                                picto.Categorias = new List<Categoria> { c };
+                        }
+
+                        if (t != null)
+                        {
+                            if (picto.Tags != null)
+                            {
+                                if (!picto.Tags.Any(tag => tag.Id == t.Id))
+                                    picto.Tags.Add(t);
+                            }
+                            else
+                                picto.Tags = new List<Tag> { t };
+                        }
+
+                        if (k != null)
+                        {
+                            if (picto.Keywords != null)
+                            {
+                                if (!picto.Keywords.Any(key => key.Id == k.Id))
+                                    picto.Keywords.Add(k);
+                            }
+                            else
+                                picto.Keywords = new List<PalabraClave> { k };
+                        }
+
+                        return p;
+                    },
+                    splitOn: "Id,Id,Id,Id,Id");
+
+                    connection.Close();
+                    return pics;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<Pictograma>> ObtenerPictogramas()
         {
             try
@@ -75,7 +134,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task<List<Pictograma>> ObtenerPictogramas(List<int> pictogramasIds)
+        public async Task<List<Pictograma>> ObtenerPictogramasPorIds(List<int> pictogramasIds)
         {
             try
             {
