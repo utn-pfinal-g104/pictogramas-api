@@ -66,7 +66,7 @@ namespace PictogramasApi.Modules
         {
             Get("/guardar", async (ctx) =>
             {
-                _actualizacionStorageJob.ActualizarPictogramas();
+                await _actualizacionStorageJob.ActualizarPictogramas();
                 await ctx.Response.Negotiate("Pictogramas actualizados");
             });
         }

@@ -47,49 +47,58 @@ namespace PictogramasApi.Jobs
             });
         }
 
-        internal async void ActualizarPictogramas()
+        internal async Task ActualizarPictogramas()
         {
             // Dejo esto hasta que el metodo este finalizado
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 
-            List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
-            List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
-            List<Tag> tags = ObtenerTags(pictogramasArasaac);
-            List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
+            //List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
+            //List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
+            //List<Tag> tags = ObtenerTags(pictogramasArasaac);
+            //List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
-            // INSERT CATEGORIAS
-            await _categoriaMgmt.AgregarCategorias(categorias); 
-            // INSERT TAGS
-            await _tagMgmt.AgregarTags(tags);
-            // INSERT PICTOGRAMAS
-            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
+            //// INSERT CATEGORIAS
+            //await _categoriaMgmt.AgregarCategorias(categorias); 
+            //// INSERT TAGS
+            //await _tagMgmt.AgregarTags(tags);
+            //// INSERT PICTOGRAMAS
+            //await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas();
-            foreach(var keyword in palabrasClaves)
-                keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;            
-            
-            // INSERT KEYWORDS
-            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+            //foreach(var keyword in palabrasClaves)
+            //    keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;            
 
-            // Pendiente
-            List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias(); 
-            List<Tag> tagsNuestras = await _tagMgmt.ObtenerTags();
-            List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
-            List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tagsNuestras, pictogramasNuestros, pictogramasArasaac);
+            //// INSERT KEYWORDS
+            //await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
 
-            // INSERT PICTOGRAMAS X CATEGORIAS
-            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
-            // INSERT PICTOGRAMAS POR TAGS
-            await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
+            //// Pendiente
+            //List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias(); 
+            //List<Tag> tagsNuestras = await _tagMgmt.ObtenerTags();
+            //List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
+            //List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tagsNuestras, pictogramasNuestros, pictogramasArasaac);
+
+            //// INSERT PICTOGRAMAS X CATEGORIAS
+            //await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
+            //// INSERT PICTOGRAMAS POR TAGS
+            //await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
 
             List<Stream> pictogramasAsStreams = new List<Stream>();
-            foreach (var pictograma in pictogramasArasaac)
+            try
             {
-                var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
-                _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos?
+                foreach (var pictograma in pictogramasArasaac)
+                {
+                    var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
+                    _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos?
+                    Console.WriteLine($"Se inserto pictograma: {pictograma._id}");
+                }
             }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            
         }
 
         private static List<PictogramaPorCategoria> ObtenerPictogramasPorCategorias(List<Categoria> categorias, List<Pictograma> pictogramas, List<Model.Responses.Pictograma> pictogramasArasaac)
