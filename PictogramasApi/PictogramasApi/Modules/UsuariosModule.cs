@@ -4,6 +4,8 @@ using Carter.Request;
 using Carter.Response;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
+using PictogramasApi.Model.Requests;
+using PictogramasApi.Utils;
 using System;
 
 namespace PictogramasApi.Modules
@@ -73,17 +75,20 @@ namespace PictogramasApi.Modules
         {
             Post("/", async (ctx) =>
             {
-                var usuarioRequest = await ctx.Request.Bind<Usuario>();
+                var usuarioRequest = await ctx.Request.Bind<UsuarioRequest>();
                 // TODO: Encriptar / hashear password
                 // Verificamos si ya existe
-                Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, usuarioRequest.Password);
+                var password = Seguridad.DesencriptarPassword(usuarioRequest.Password);
+                Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, password);
                 if (usuario == null)
-                    usuario = await _usuarioMgmt.CrearUsuario(usuarioRequest);
+                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { NombreUsuario = usuarioRequest.NombreUsuario, Password = password });
 
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson(usuario);
             });
         }
+
+
 
         private void PatchUsuario()
         {
