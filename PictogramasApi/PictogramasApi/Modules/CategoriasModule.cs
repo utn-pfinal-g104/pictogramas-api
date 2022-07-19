@@ -1,7 +1,6 @@
 ﻿using Carter;
 using Carter.Response;
 using PictogramasApi.Mgmt.Sql.Interface;
-using System;
 
 namespace PictogramasApi.Modules
 {
@@ -30,7 +29,7 @@ namespace PictogramasApi.Modules
         {
             Get("/total", async (ctx) =>
             {
-                var categorias = await _categoriaMgmt.GetCategorias();
+                var categorias = await _categoriaMgmt.ObtenerTotalCategorias();
                 await ctx.Response.Negotiate(categorias);
             });
         }
