@@ -58,6 +58,7 @@ namespace PictogramasApi.Modules
 
             #region "Storage"
             GetPictogramaDelStorage();
+            GetPictogramaDelStorageAsBase64();
             GetPictogramaPorKeyword();
             GetPictogramasPorNombreCategoria();
             GetPictogramasPorCategoriaId();
@@ -147,6 +148,27 @@ namespace PictogramasApi.Modules
                 {
                     await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
+                }
+                else
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.Negotiate("No existe el pictograma");
+                }
+            });
+        }
+
+        private void GetPictogramaDelStorageAsBase64()
+        {
+            Get("/{filename:minlength(1)}/obtener/base64", async (ctx) =>
+            {
+                var filename = ctx.Request.RouteValues.As<string>("filename");
+
+                var pictograma = _storageMgmt.Obtener(filename);
+
+                if (pictograma != null)
+                {
+                    var stringEnBase64 = Parser.ConvertToBase64(pictograma);
+                    await ctx.Response.Negotiate(stringEnBase64);
                 }
                 else
                 {
