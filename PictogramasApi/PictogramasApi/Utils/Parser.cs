@@ -7,7 +7,7 @@ namespace PictogramasApi.Utils
     public static class Parser
     {
         // Posibilidad para convertir en base64 para mostrar en la web
-        public static Stream ConvertToBase64(this Stream stream)
+        public static string ConvertToBase64(this Stream stream)
         {
             byte[] bytes;
             using (var memoryStream = new MemoryStream())
@@ -16,8 +16,7 @@ namespace PictogramasApi.Utils
                 bytes = memoryStream.ToArray();
             }
 
-            string base64 = Convert.ToBase64String(bytes);
-            return new MemoryStream(Encoding.UTF8.GetBytes(base64));
+            return Convert.ToBase64String(bytes);
         }
     }
 }

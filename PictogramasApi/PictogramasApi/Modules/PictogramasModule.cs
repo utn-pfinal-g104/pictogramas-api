@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
+using PictogramasApi.Model;
 using PictogramasApi.Services;
 using PictogramasApi.Utils;
 using System;
@@ -50,8 +51,14 @@ namespace PictogramasApi.Modules
             GetPictogramasDeArasaacYGuardarlos();
             #endregion "Arasaac"
 
+            #region "BD"
+            GetTotalPictogramas();
+            GetInformacionPictogramas();
+            #endregion "BD"
+
             #region "Storage"
             GetPictogramaDelStorage();
+            GetPictogramaDelStorageAsBase64();
             GetPictogramaPorKeyword();
             GetPictogramasPorNombreCategoria();
             GetPictogramasPorCategoriaId();
@@ -62,12 +69,30 @@ namespace PictogramasApi.Modules
             #endregion "Storage"
         }
 
+        private void GetInformacionPictogramas()
+        {
+            Get("/informacion", async (ctx) =>
+            {
+                List<Pictograma> pictogramas = await _pictogramaMgmt.ObtenerInformacionPictogramas();                
+                await ctx.Response.Negotiate(pictogramas);
+            });
+        }
+
         private void GetPictogramasDeArasaacYGuardarlos()
         {
             Get("/guardar", async (ctx) =>
             {
                 await _actualizacionStorageJob.ActualizarPictogramas();
                 await ctx.Response.Negotiate("Pictogramas actualizados");
+            });
+        }
+
+        private void GetTotalPictogramas()
+        {
+            Get("/total", async (ctx) =>
+            {
+                int total = await _pictogramaMgmt.ObtenerTotalPictogramas();
+                await ctx.Response.Negotiate(total);
             });
         }
 
@@ -123,6 +148,27 @@ namespace PictogramasApi.Modules
                 {
                     await ctx.Response.FromStream(pictograma, $"image/png",
                         new ContentDisposition($"attachment;filename=pictograma.png"));
+                }
+                else
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.Negotiate("No existe el pictograma");
+                }
+            });
+        }
+
+        private void GetPictogramaDelStorageAsBase64()
+        {
+            Get("/{filename:minlength(1)}/obtener/base64", async (ctx) =>
+            {
+                var filename = ctx.Request.RouteValues.As<string>("filename");
+
+                var pictograma = _storageMgmt.Obtener(filename);
+
+                if (pictograma != null)
+                {
+                    var stringEnBase64 = Parser.ConvertToBase64(pictograma);
+                    await ctx.Response.Negotiate(stringEnBase64);
                 }
                 else
                 {
@@ -225,7 +271,7 @@ namespace PictogramasApi.Modules
 
         private async Task ObtenerPictogramasPorIds(HttpContext ctx, List<int> pictogramasIds)
         {
-            var pictogramas = await _pictogramaMgmt.ObtenerPictogramas(pictogramasIds);
+            var pictogramas = await _pictogramaMgmt.ObtenerPictogramasPorIds(pictogramasIds);
 
             if (pictogramas != null)
             {

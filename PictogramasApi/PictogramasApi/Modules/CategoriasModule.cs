@@ -13,6 +13,7 @@ namespace PictogramasApi.Modules
             _categoriaMgmt = categoriaMgmt;
 
             GetCategorias();
+            GetTotalCategorias();
         }
 
         private void GetCategorias()
@@ -20,6 +21,15 @@ namespace PictogramasApi.Modules
             Get("/", async (ctx) =>
             {
                 var categorias = await _categoriaMgmt.GetCategorias();
+                await ctx.Response.Negotiate(categorias);
+            });
+        }
+
+        private void GetTotalCategorias()
+        {
+            Get("/total", async (ctx) =>
+            {
+                var categorias = await _categoriaMgmt.ObtenerTotalCategorias();
                 await ctx.Response.Negotiate(categorias);
             });
         }

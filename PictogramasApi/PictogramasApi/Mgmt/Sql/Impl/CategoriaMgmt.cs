@@ -62,6 +62,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
+        public async Task<int> ObtenerTotalCategorias()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    int categorias = await connection.CountAsync<Categoria>();
+                    connection.Close();
+                    return categorias;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<Categoria> ObtenerCategoria(string nombre)
         {
             try
