@@ -61,6 +61,7 @@ namespace PictogramasApi.Modules
                 var password = ctx.Request.RouteValues.As<string>("password");
                 try
                 {
+                    password = Seguridad.sha256_hash(password);
                     Usuario usuario = await _usuarioMgmt.GetUsuario(username, password);
                     await ctx.Response.Negotiate(usuario);
                 }
@@ -103,6 +104,7 @@ namespace PictogramasApi.Modules
             {
                 var usuario = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
+                usuario.Password = Seguridad.sha256_hash(usuario.Password);
                 await _usuarioMgmt.ActualizarUsuario(usuario);
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson("Usuario creado");
