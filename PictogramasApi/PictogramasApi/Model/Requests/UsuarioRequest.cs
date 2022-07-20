@@ -8,7 +8,6 @@ namespace PictogramasApi.Model.Requests
     public class UsuarioRequest
     {
         public string NombreUsuario { get; set; }
-        public byte[] Password { get; set; }
-
+        public string Password { get; set; }
     }
 }

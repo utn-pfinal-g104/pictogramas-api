@@ -7,6 +7,7 @@ using PictogramasApi.Model;
 using PictogramasApi.Model.Requests;
 using PictogramasApi.Utils;
 using System;
+using System.Text;
 
 namespace PictogramasApi.Modules
 {
@@ -78,7 +79,13 @@ namespace PictogramasApi.Modules
                 var usuarioRequest = await ctx.Request.Bind<UsuarioRequest>();
                 // TODO: Encriptar / hashear password
                 // Verificamos si ya existe
-                var password = Seguridad.DesencriptarPassword(usuarioRequest.Password);
+
+                //var p = Seguridad.DecryptStringAES(usuarioRequest.Password);
+                //byte[] bytes = Encoding.ASCII.GetBytes(usuarioRequest.Password);
+                //var password = Seguridad.DesencriptarPassword(bytes);
+
+                var password = Seguridad.sha256_hash(usuarioRequest.Password);
+
                 Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, password);
                 if (usuario == null)
                     usuario = await _usuarioMgmt.CrearUsuario(new Usuario { NombreUsuario = usuarioRequest.NombreUsuario, Password = password });
