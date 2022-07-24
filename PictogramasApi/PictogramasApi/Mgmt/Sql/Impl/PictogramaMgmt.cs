@@ -104,7 +104,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
 
                         return p;
                     },
-                    splitOn: "Id,Id,Id,Id,Id");
+                    splitOn: "Id,Id,Id,Id,Id", commandTimeout: 10000);
 
                     connection.Close();
                     return pics;
