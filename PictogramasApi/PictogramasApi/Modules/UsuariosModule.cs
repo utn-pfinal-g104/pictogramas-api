@@ -24,6 +24,17 @@ namespace PictogramasApi.Modules
             GetUsuarioPorUsernameYPassword();
             PostUsuario();
             PatchUsuario();
+            PostPictogramaDeUsuario();
+        }
+
+        private void PostPictogramaDeUsuario()
+        {
+            Post("/{id:int}/pictogramas", async (ctx) =>
+            {
+                var idUsuario = ctx.Request.RouteValues.As<int>("id");
+                var request = await ctx.Request.Bind<PictogramaRequest>();
+                await ctx.Response.Negotiate("");
+            });
         }
 
         private void GetUsuarios()
