@@ -16,6 +16,7 @@ using Quartz;
 using AutoMapper;
 using PictogramasApi.Utils;
 using PictogramasApi.Services;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace PictogramasApi
 {
@@ -38,6 +39,14 @@ namespace PictogramasApi
             services.AddHttpClient();
             services.AddCarter();
             services.AddControllers();
+
+            services.Configure<FormOptions>(options =>
+            {
+                options.KeyLengthLimit = int.MaxValue;
+                options.ValueCountLimit = int.MaxValue;
+                options.ValueLengthLimit = int.MaxValue;
+                options.MultipartHeadersLengthLimit = int.MaxValue;
+            });
 
             services.AddSingleton<INeo4JMgmt,Neo4JMgmt>();
             services.AddSingleton<IStorageMgmt, StorageMgmt>();

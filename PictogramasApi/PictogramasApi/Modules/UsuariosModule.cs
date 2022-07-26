@@ -7,6 +7,7 @@ using PictogramasApi.Model;
 using PictogramasApi.Model.Requests;
 using PictogramasApi.Utils;
 using System;
+using System.Net;
 using System.Text;
 
 namespace PictogramasApi.Modules
@@ -31,9 +32,17 @@ namespace PictogramasApi.Modules
         {
             Post("/{id:int}/pictogramas", async (ctx) =>
             {
-                var idUsuario = ctx.Request.RouteValues.As<int>("id");
-                var request = await ctx.Request.Bind<PictogramaRequest>();
-                await ctx.Response.Negotiate("");
+                try
+                {
+                    var request = await ctx.Request.Bind<PictogramaRequest>();
+                    var idUsuario = ctx.Request.RouteValues.As<int>("id");
+                    await ctx.Response.Negotiate("");
+                }
+                catch(Exception ex)
+                {
+                    ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    await ctx.Response.Negotiate("");
+                }
             });
         }
 

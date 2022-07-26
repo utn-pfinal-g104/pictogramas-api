@@ -2,9 +2,16 @@
 {
     public class PictogramaRequest
     {
-        public string Filtros { get; set; }
-        public byte[] File { get; set; }
-        public string CategoriasFiltradas {get; set;}
+        public bool Schematic { get; set; }
+        public bool Sex { get; set; }
+        public bool Violence { get; set; }
+        public bool Aac { get; set; }
+        public bool AacColor { get; set; }
+        public bool Skin { get; set; }
+        public bool Hair { get; set; }
+        public string File { get; set; }
+        public string FileName { get; set; }
+        public Categoria CategoriasFiltradas {get; set;}
     }
 
 }
