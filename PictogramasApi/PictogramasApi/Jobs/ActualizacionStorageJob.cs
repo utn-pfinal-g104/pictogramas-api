@@ -129,7 +129,7 @@ namespace PictogramasApi.Jobs
                         picsXtags.Add(new PictogramaPorTag
                         {
                             IdTag = tags.FirstOrDefault(t => t.Nombre == tag).Id,
-                            IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                            IdPictograma = (int)pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
                         });
                 }
             }

@@ -13,6 +13,7 @@ namespace PictogramasApi.Model.Requests
         public bool Hair { get; set; }
         public string File { get; set; }
         public string FileName { get; set; }
+        public string Keyword { get; set; }
         public List<Categoria> CategoriasFiltradas {get; set;}
     }
 

@@ -19,14 +19,17 @@ namespace PictogramasApi.Modules
         private readonly IPictogramaMgmt _pictogramaMgmt;
         private readonly IStorageMgmt _storageMgmt;
         private readonly IPictogramaPorCategoriaMgmt _pictogramaPorCategoriaMgmt;
+        private readonly IPalabraClaveMgmt _palabraClaveMgmt;
 
         public UsuariosModule(IUsuarioMgmt usuarioMgmt, IPictogramaMgmt pictogramaMgmt,
-            IStorageMgmt storageMgmt, IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt) : base("/usuarios")
+            IStorageMgmt storageMgmt, IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt,
+            IPalabraClaveMgmt palabraClaveMgmt) : base("/usuarios")
         {
             _usuarioMgmt = usuarioMgmt;
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
             _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
+            _palabraClaveMgmt = palabraClaveMgmt;
 
             GetUsuarios();
             GetUsuarioPorId();
@@ -57,6 +60,7 @@ namespace PictogramasApi.Modules
                     };
                     pictograma = await _pictogramaMgmt.AgregarPictograma(pictograma);
                     await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.CategoriasFiltradas);
+                    await _palabraClaveMgmt.AgregarPalabraClave(pictograma, request.Keyword);
                     _storageMgmt.Guardar(Parser.ConvertFromBase64(request.File), request.FileName);
                     await ctx.Response.Negotiate("Se creo el pictograma");
                 }

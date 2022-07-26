@@ -17,6 +17,9 @@ namespace PictogramasApi.Model.Mapping
             Map(x => x.AacColor).Column("AacColor");
             Map(x => x.IdArasaac).Column("IdArasaac");
             Map(x => x.IdUsuario).Column("IdUsuario");
+            Map(x => x.Categorias).Ignore();
+            Map(x => x.Tags).Ignore();
+            Map(x => x.Keywords).Ignore();
         }
     }
 }

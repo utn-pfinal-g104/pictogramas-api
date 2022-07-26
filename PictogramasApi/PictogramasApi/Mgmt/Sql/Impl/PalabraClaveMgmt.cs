@@ -21,6 +21,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             _context = context;
         }
 
+        public async Task AgregarPalabraClave(Pictograma pictograma, string keyword)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await connection.InsertAsync(new PalabraClave { Keyword = keyword, IdPictograma = pictograma.Id });
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task AgregarPalabrasClaves(List<PalabraClave> palabrasClaves)
         {
             try
