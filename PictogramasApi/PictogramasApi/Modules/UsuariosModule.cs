@@ -2,6 +2,7 @@
 using Carter.ModelBinding;
 using Carter.Request;
 using Carter.Response;
+using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
 using PictogramasApi.Model.Requests;
@@ -15,10 +16,17 @@ namespace PictogramasApi.Modules
     public class UsuariosModule : CarterModule
     {
         private readonly IUsuarioMgmt _usuarioMgmt;
+        private readonly IPictogramaMgmt _pictogramaMgmt;
+        private readonly IStorageMgmt _storageMgmt;
+        private readonly IPictogramaPorCategoriaMgmt _pictogramaPorCategoriaMgmt;
 
-        public UsuariosModule(IUsuarioMgmt usuarioMgmt) : base("/usuarios")
+        public UsuariosModule(IUsuarioMgmt usuarioMgmt, IPictogramaMgmt pictogramaMgmt,
+            IStorageMgmt storageMgmt, IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt) : base("/usuarios")
         {
             _usuarioMgmt = usuarioMgmt;
+            _pictogramaMgmt = pictogramaMgmt;
+            _storageMgmt = storageMgmt;
+            _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
 
             GetUsuarios();
             GetUsuarioPorId();
@@ -36,7 +44,21 @@ namespace PictogramasApi.Modules
                 {
                     var request = await ctx.Request.Bind<PictogramaRequest>();
                     var idUsuario = ctx.Request.RouteValues.As<int>("id");
-                    await ctx.Response.Negotiate("");
+                    Pictograma pictograma = new Pictograma
+                    {
+                        Aac = request.Aac,
+                        AacColor = request.AacColor,
+                        Hair = request.Hair,
+                        IdUsuario = idUsuario,
+                        Schematic = request.Schematic,
+                        Sex = request.Sex,
+                        Skin = request.Skin,
+                        Violence = request.Violence
+                    };
+                    pictograma = await _pictogramaMgmt.AgregarPictograma(pictograma);
+                    await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.CategoriasFiltradas);
+                    _storageMgmt.Guardar(Parser.ConvertFromBase64(request.File), request.FileName);
+                    await ctx.Response.Negotiate("Se creo el pictograma");
                 }
                 catch(Exception ex)
                 {

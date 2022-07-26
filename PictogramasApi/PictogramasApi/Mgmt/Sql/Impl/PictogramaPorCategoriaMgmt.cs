@@ -50,6 +50,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public async Task AgregarRelaciones(Pictograma pictograma, List<Categoria> categorias)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    foreach(var categoria in categorias)
+                        pictograma = (await connection.Insert(new PictogramaPorCategoria { IdCategoria = categoria.Id, IdPictograma = pictograma.Id}));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<PictogramaPorCategoria>> ObtenerPictogramasPorCategoria(int categoria)
         {
             try

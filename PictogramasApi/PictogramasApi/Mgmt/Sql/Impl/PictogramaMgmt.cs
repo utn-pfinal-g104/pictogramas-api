@@ -20,6 +20,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             _context = context;
         }
 
+        public async Task<Pictograma> AgregarPictograma(Pictograma pictograma)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    pictograma = (await connection.Insert(pictograma));
+                    connection.Close();
+                    return pictograma;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task AgregarPictogramas(List<Pictograma> pictogramas)
         {
             try
