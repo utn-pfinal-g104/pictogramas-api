@@ -1,4 +1,6 @@
-﻿namespace PictogramasApi.Model.Requests
+﻿using System.Collections.Generic;
+
+namespace PictogramasApi.Model.Requests
 {
     public class PictogramaRequest
     {
@@ -11,7 +13,7 @@
         public bool Hair { get; set; }
         public string File { get; set; }
         public string FileName { get; set; }
-        public Categoria CategoriasFiltradas {get; set;}
+        public List<Categoria> CategoriasFiltradas {get; set;}
     }
 
 }
