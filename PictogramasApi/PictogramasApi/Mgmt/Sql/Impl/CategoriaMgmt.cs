@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -45,12 +44,12 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             try
             { 
-                return await Task.Run(async () =>
+                return await Task.Run(() =>
                 {
                     using (IDbConnection connection = _context.CreateConnection())
                     {
                         connection.Open();
-                        var categorias = await connection.GetListAsync<Categoria>();
+                        var categorias = connection.GetList<Categoria>();
                         connection.Close();
                         return categorias.ToList();
                     }
@@ -69,7 +68,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    int categorias = await connection.CountAsync<Categoria>();
+                    int categorias = connection.GetList<Categoria>().Count();
                     connection.Close();
                     return categorias;
                 }
@@ -89,7 +88,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     pgAnd.Predicates.Add(Predicates.Field<Categoria>(c => c.Nombre, Operator.Eq, nombre));
-                    var categoria = (await connection.GetListAsync<Categoria>(pgAnd)).FirstOrDefault();
+                    var categoria = (connection.GetList<Categoria>(pgAnd)).FirstOrDefault();
                     connection.Close();
                     return categoria;
                 }
@@ -107,7 +106,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var categorias = (await connection.GetListAsync<Categoria>()).ToList();
+                    var categorias = (connection.GetList<Categoria>()).ToList();
                     connection.Close();
                     return categorias;
                 }

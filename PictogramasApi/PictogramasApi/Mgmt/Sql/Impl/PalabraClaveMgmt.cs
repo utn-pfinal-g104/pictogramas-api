@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -28,7 +27,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await connection.InsertAsync(new PalabraClave { Keyword = keyword, IdPictograma = pictograma.Id });
+                    connection.Insert(new PalabraClave { Keyword = keyword, IdPictograma = pictograma.Id, Meaning = "", Tipo= 0, Plural="", HasLocution=false });
                     connection.Close();
                 }
             }
@@ -80,7 +79,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     pgAnd.Predicates.Add(Predicates.Field<PalabraClave>(p => p.Keyword, Operator.Eq, palabra));
-                    var keyword = (await connection.GetListAsync<PalabraClave>(pgAnd)).FirstOrDefault();
+                    var keyword = (connection.GetList<PalabraClave>(pgAnd)).FirstOrDefault();
                     connection.Close();
                     return keyword;
                 }
@@ -98,7 +97,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var tags = (await connection.GetListAsync<PalabraClave>()).ToList();
+                    var tags = (connection.GetList<PalabraClave>()).ToList();
                     connection.Close();
                     return tags;
                 }

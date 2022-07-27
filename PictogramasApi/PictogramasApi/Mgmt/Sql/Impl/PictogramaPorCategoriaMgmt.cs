@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -57,8 +56,8 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    foreach(var categoria in categorias)
-                        pictograma = (await connection.Insert(new PictogramaPorCategoria { IdCategoria = categoria.Id, IdPictograma = pictograma.Id}));
+                    foreach (var categoria in categorias)
+                        connection.Insert(new PictogramaPorCategoria { IdCategoria = categoria.Id, IdPictograma = pictograma.Id });
                     connection.Close();
                 }
             }
@@ -77,7 +76,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     pgAnd.Predicates.Add(Predicates.Field<PictogramaPorCategoria>(p => p.IdCategoria, Operator.Eq, categoria));
-                    var picsXcat = (await connection.GetListAsync<PictogramaPorCategoria>(pgAnd)).ToList();
+                    var picsXcat = (connection.GetList<PictogramaPorCategoria>(pgAnd)).ToList();
                     connection.Close();
                     return picsXcat;
                 }

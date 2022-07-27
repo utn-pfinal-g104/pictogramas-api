@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -29,7 +28,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     using (IDbConnection connection = _context.CreateConnection())
                     {
                         connection.Open();
-                        var categorias = await connection.GetListAsync<Usuario>();
+                        var categorias = connection.GetList<Usuario>();
                         connection.Close();
                         return categorias.ToList();
                     }
@@ -67,7 +66,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await connection.InsertAsync<Usuario>(usuario);
+                    connection.Insert<Usuario>(usuario);
                     connection.Close();
                     return usuario;
                 }
@@ -89,7 +88,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     //TODO: La palabra asociada al pictograma se encuentra en la tabla keywords, por lo cual requiere joinear
                     pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.NombreUsuario, Operator.Eq, username));
                     pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.Password, Operator.Eq, password));
-                    Usuario usuario = (await connection.GetListAsync<Usuario>(pgAnd)).FirstOrDefault();
+                    Usuario usuario = ( connection.GetList<Usuario>(pgAnd)).FirstOrDefault();
                     connection.Close();
                     return usuario;
                 }
@@ -107,7 +106,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await connection.UpdateAsync(usuario);
+                    connection.Update(usuario);
                     connection.Close();
                 }
             }

@@ -24,16 +24,16 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             try
             {
-                string values = $"{(pictograma.Schematic?'1':'0')},{(pictograma.Sex ? '1' : '0')},{(pictograma.Violence ? '1' : '0')},{(pictograma.Aac ? '1' : '0')},{(pictograma.AacColor ? '1' : '0')},{(pictograma.Skin ? '1' : '0')},{(pictograma.Hair ? '1' : '0')},null,{pictograma.IdUsuario}";
-                string insert = $"insert into Pictogramas (Schematic,Sex,Violence,Aac,AacColor,Skin,Hair,IdArasaac,IdUsuario) values ({values})";
+                //string values = $"{(pictograma.Schematic?'1':'0')},{(pictograma.Sex ? '1' : '0')},{(pictograma.Violence ? '1' : '0')},{(pictograma.Aac ? '1' : '0')},{(pictograma.AacColor ? '1' : '0')},{(pictograma.Skin ? '1' : '0')},{(pictograma.Hair ? '1' : '0')},null,{pictograma.IdUsuario}";
+                //string insert = $"insert into Pictogramas (Schematic,Sex,Violence,Aac,AacColor,Skin,Hair,IdArasaac,IdUsuario) values ({values})";
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
                     //TODO: Esto es incorrecto y para ir probando por ahora, igualmente ese id que devuelve es si inserto bien o no
-                    var id = await Task.Run(() => connection.Execute(insert));
-                    pictograma.Id = id;
+                    //var id = await Task.Run(() => connection.Execute(insert));
+                    //pictograma.Id = id;
                     // TODO: Debe funcionar este
-                    //pictograma = await Task.Run(() => connection.Insert(pictograma));
+                    await Task.Run(() => connection.Insert(pictograma));
                     connection.Close();
                     return pictograma;
                 }
@@ -147,7 +147,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pictogramas = (await connection.GetListAsync<Pictograma>()).ToList();
+                    var pictogramas = (connection.GetList<Pictograma>()).ToList();
                     connection.Close();
                     return pictogramas;
                 }
@@ -192,7 +192,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pictogramas = await connection.CountAsync<Pictograma>();
+                    var pictogramas = connection.GetList<Pictograma>().Count();
                     connection.Close();
                     return pictogramas;
                 }

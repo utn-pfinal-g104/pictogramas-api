@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -59,7 +58,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     pgAnd.Predicates.Add(Predicates.Field<PictogramaPorTag>(p => p.IdTag, Operator.Eq, tag));
-                    var picsXtag = (await connection.GetListAsync<PictogramaPorTag>(pgAnd)).ToList();
+                    var picsXtag = (connection.GetList<PictogramaPorTag>(pgAnd)).ToList();
                     connection.Close();
                     return picsXtag;
                 }

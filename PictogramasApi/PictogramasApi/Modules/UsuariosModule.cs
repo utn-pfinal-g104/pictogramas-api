@@ -61,7 +61,8 @@ namespace PictogramasApi.Modules
                     pictograma = await _pictogramaMgmt.AgregarPictograma(pictograma);
                     await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.CategoriasFiltradas);
                     await _palabraClaveMgmt.AgregarPalabraClave(pictograma, request.Keyword);
-                    _storageMgmt.Guardar(Parser.ConvertFromBase64(request.File), request.FileName);
+                    var imagenEnBase64 = request.File.Substring(request.File.LastIndexOf(',') + 1);
+                    _storageMgmt.Guardar(Parser.ConvertFromBase64(imagenEnBase64), pictograma.Id.ToString());
                     await ctx.Response.Negotiate("Se creo el pictograma");
                 }
                 catch(Exception ex)
