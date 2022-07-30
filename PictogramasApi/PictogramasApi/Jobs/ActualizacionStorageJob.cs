@@ -66,7 +66,7 @@ namespace PictogramasApi.Jobs
             //// INSERT PICTOGRAMAS
             //await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
-            var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas();
+            var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
             //foreach(var keyword in palabrasClaves)
             //    keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;            
 

@@ -75,16 +75,20 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
-        public async Task<List<Pictograma>> ObtenerInformacionPictogramas()
+        public async Task<List<Pictograma>> ObtenerInformacionPictogramas(int? usuarioId)
         {
             try
             {
-                var pics = await ObtenerPictogramas();
+                var pics = await ObtenerPictogramas(usuarioId);
 
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag)";
+                    string sql;
+                    if(usuarioId != null)
+                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag) where (p.IdUsuario = {usuarioId} or p.IdUsuario is null)";
+                    else
+                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag) where p.IdUsuario is null";
                     var pictogramas = await connection.QueryAsync<Pictograma, PictogramaPorCategoria, PictogramaPorTag, PalabraClave, Categoria, Tag, Pictograma>(sql, (p, pc, pt, k, c, t) => {
                         var picto = pics.FirstOrDefault(pic => pic.Id == p.Id);
                         if (c != null)
@@ -134,14 +138,18 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task<List<Pictograma>> ObtenerPictogramas()
+        public async Task<List<Pictograma>> ObtenerPictogramas(int? usuarioId)
         {
             try
             {                
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pictogramas = (connection.GetList<Pictograma>()).ToList();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, null));
+                    if (usuarioId != null)
+                        pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, usuarioId));
+                    var pictogramas = (connection.GetList<Pictograma>(pgAnd)).ToList();
                     connection.Close();
                     return pictogramas;
                 }

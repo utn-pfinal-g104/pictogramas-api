@@ -73,7 +73,11 @@ namespace PictogramasApi.Modules
         {
             Get("/informacion", async (ctx) =>
             {
-                List<Pictograma> pictogramas = await _pictogramaMgmt.ObtenerInformacionPictogramas();                
+                List<Pictograma> pictogramas;
+                if (Int32.TryParse(ctx.Request.Query["UsuarioId"], out int usuarioId))
+                    pictogramas = await _pictogramaMgmt.ObtenerInformacionPictogramas(usuarioId);
+                else
+                    pictogramas = await _pictogramaMgmt.ObtenerInformacionPictogramas(null);
                 await ctx.Response.Negotiate(pictogramas);
             });
         }
