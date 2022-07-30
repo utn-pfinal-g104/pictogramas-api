@@ -91,7 +91,11 @@ namespace PictogramasApi.Modules
         {
             Get("/total", async (ctx) =>
             {
-                int total = await _pictogramaMgmt.ObtenerTotalPictogramas();
+                int total;
+                if (Int32.TryParse(ctx.Request.Query["UsuarioId"], out int usuarioId))
+                    total = await _pictogramaMgmt.ObtenerTotalPictogramas(usuarioId);
+                else
+                    total = await _pictogramaMgmt.ObtenerTotalPictogramas();
                 await ctx.Response.Negotiate(total);
             });
         }
@@ -227,7 +231,6 @@ namespace PictogramasApi.Modules
             Get("/categorias/id/{categoria:int}", async (ctx) =>
             {
                 var categoria = ctx.Request.RouteValues.As<int>("categoria");
-
                 await ObtenerPictogramasPorCategoriaId(ctx, categoria);
             });
         }

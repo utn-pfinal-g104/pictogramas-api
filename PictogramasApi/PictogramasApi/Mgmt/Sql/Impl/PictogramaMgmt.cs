@@ -24,15 +24,9 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             try
             {
-                //string values = $"{(pictograma.Schematic?'1':'0')},{(pictograma.Sex ? '1' : '0')},{(pictograma.Violence ? '1' : '0')},{(pictograma.Aac ? '1' : '0')},{(pictograma.AacColor ? '1' : '0')},{(pictograma.Skin ? '1' : '0')},{(pictograma.Hair ? '1' : '0')},null,{pictograma.IdUsuario}";
-                //string insert = $"insert into Pictogramas (Schematic,Sex,Violence,Aac,AacColor,Skin,Hair,IdArasaac,IdUsuario) values ({values})";
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    //TODO: Esto es incorrecto y para ir probando por ahora, igualmente ese id que devuelve es si inserto bien o no
-                    //var id = await Task.Run(() => connection.Execute(insert));
-                    //pictograma.Id = id;
-                    // TODO: Debe funcionar este
                     await Task.Run(() => connection.Insert(pictograma));
                     connection.Close();
                     return pictograma;
@@ -192,9 +186,32 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pictogramas = connection.GetList<Pictograma>().Count();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, null));
+                    var cantidadPictogramas = (connection.GetList<Pictograma>(pgAnd)).Count();
                     connection.Close();
-                    return pictogramas;
+                    return cantidadPictogramas;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<int> ObtenerTotalPictogramas(int usuarioId)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, usuarioId));
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, null));
+                    var cantidadPictogramas = (connection.GetList<Pictograma>(pgAnd)).Count();
+                    connection.Close();
+                    return cantidadPictogramas;
                 }
             }
             catch (Exception ex)

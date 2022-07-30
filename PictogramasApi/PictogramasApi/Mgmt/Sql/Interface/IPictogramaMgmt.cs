@@ -12,5 +12,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         Task<int> ObtenerTotalPictogramas();
         Task<List<Pictograma>> ObtenerInformacionPictogramas();
         Task<Pictograma> AgregarPictograma(Pictograma pictograma);
+        Task<int> ObtenerTotalPictogramas(int usuarioId);
     }
 }
