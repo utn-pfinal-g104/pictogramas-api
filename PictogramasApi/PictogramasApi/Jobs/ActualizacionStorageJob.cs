@@ -50,40 +50,43 @@ namespace PictogramasApi.Jobs
         internal async Task ActualizarPictogramas()
         {
             // Dejo esto hasta que el metodo este finalizado
-            //throw new NotImplementedException();
+            throw new NotImplementedException();
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 
-            //List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
-            //List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
-            //List<Tag> tags = ObtenerTags(pictogramasArasaac);
-            //List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
+            List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
+            List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
+            List<Tag> tags = ObtenerTags(pictogramasArasaac);
+            List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
             //// INSERT CATEGORIAS
-            //await _categoriaMgmt.AgregarCategorias(categorias); 
-            //// INSERT TAGS
-            //await _tagMgmt.AgregarTags(tags);
+            //Unificacion de categorias y tags
+            foreach(var tag in tags)
+            {
+                if (!categorias.Any(c => c.Nombre == tag.Nombre))
+                    categorias.Add(new Categoria { Nombre = tag.Nombre });
+            }
+            await _categoriaMgmt.AgregarCategorias(categorias);
+
             //// INSERT PICTOGRAMAS
-            //await _pictogramaMgmt.AgregarPictogramas(pictogramas);
+            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
-            //foreach(var keyword in palabrasClaves)
-            //    keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;            
+            foreach (var keyword in palabrasClaves)
+                keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;
 
             //// INSERT KEYWORDS
-            //await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
 
-            //// Pendiente
-            //List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias(); 
-            //List<Tag> tagsNuestras = await _tagMgmt.ObtenerTags();
-            //List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
-            //List<PictogramaPorTag> picsXtags = ObtenerPictogramasPorTags(tagsNuestras, pictogramasNuestros, pictogramasArasaac);
+            List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
+            // Tambien agrega tags como categorias
+            List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
+            
 
             //// INSERT PICTOGRAMAS X CATEGORIAS
-            //await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
-            //// INSERT PICTOGRAMAS POR TAGS
-            //await _pictogramaPorTagMgmt.AgregarRelaciones(picsXtags);
+            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
 
+            //Guardar imagenes en Storage
             List<Stream> pictogramasAsStreams = new List<Stream>();
             try
             {
@@ -98,24 +101,50 @@ namespace PictogramasApi.Jobs
             {
                 throw e;
             }
-            
         }
 
+        // Tambien agrega tags como categorias
         private static List<PictogramaPorCategoria> ObtenerPictogramasPorCategorias(List<Categoria> categorias, List<Pictograma> pictogramas, List<Model.Responses.Pictograma> pictogramasArasaac)
         {
-            List<PictogramaPorCategoria> picsXcats = new List<PictogramaPorCategoria>();
-            foreach (var pictograma in pictogramasArasaac)
+            try
             {
-                foreach(var categoria in pictograma.categories)
+                List<PictogramaPorCategoria> picsXcats = new List<PictogramaPorCategoria>();
+                foreach (var pictograma in pictogramasArasaac)
                 {
-                    picsXcats.Add(new PictogramaPorCategoria
+                    foreach (var categoria in pictograma.categories)
                     {
-                        IdCategoria = categorias.FirstOrDefault(c => c.Nombre == categoria).Id,
-                        IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
-                    });
+                        picsXcats.Add(new PictogramaPorCategoria
+                        {
+                            IdCategoria = categorias.FirstOrDefault(c => c.Nombre == categoria).Id,
+                            IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                        });
+                    }
+
+                    try
+                    {
+                        if (pictograma.tags != null)
+                        {
+                            foreach (var tag in pictograma.tags)
+                            {
+                                if (!pictograma.categories.Any(c => c == tag))
+                                    picsXcats.Add(new PictogramaPorCategoria
+                                    {
+                                        IdCategoria = categorias.FirstOrDefault(c => c.Nombre == tag).Id,
+                                        IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                                    });
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
+                return picsXcats;
             }
-            return picsXcats;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         private static List<PictogramaPorTag> ObtenerPictogramasPorTags(List<Tag> tags, List<Pictograma> pictogramas, List<Model.Responses.Pictograma> pictogramasArasaac)
