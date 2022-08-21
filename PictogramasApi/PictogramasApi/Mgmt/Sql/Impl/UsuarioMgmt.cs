@@ -85,7 +85,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 {
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
-                    //TODO: La palabra asociada al pictograma se encuentra en la tabla keywords, por lo cual requiere joinear
+                    
                     pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.NombreUsuario, Operator.Eq, username));
                     pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.Password, Operator.Eq, password));
                     Usuario usuario = ( connection.GetList<Usuario>(pgAnd)).FirstOrDefault();
