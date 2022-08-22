@@ -36,6 +36,13 @@ Respuesta de postman al finalizar:
 ![Respuesta Postman Status Code 200](https://user-images.githubusercontent.com/26606912/186031421-6feb751f-7d92-4d3c-88e6-03d846db0636.png)
 
 
-7) Abrir proyecto **web** y ejecutar npm install y npm start. La api debe sergui corriendo para completar lo que sigue. Crear una cuenta y click en el botón "descargar pictogramas nuestros". Esto lo que hace es insertar en la indexDB del browser. Este proceso también tarda porque hay un proceso que tiene que convertir las imágenes de base64 a otro formato antes de insertarlas directamente.
+7) Abrir proyecto **web** y ejecutar npm install y npm start. La api debe sergui corriendo para completar lo que sigue. Crear una cuenta y click en el botón "descargar pictogramas nuestros". Esto lo que hace es insertar en la indexedDB del browser. Este proceso también tarda porque hay un proceso que tiene que convertir las imágenes de base64 a otro formato antes de insertarlas directamente.
 
-![image](https://user-images.githubusercontent.com/26606912/186033257-692cbb11-91a4-46a0-a536-84dce49fffea.png)
+![click para descargar pictogramas a la indexDB](https://user-images.githubusercontent.com/26606912/186033257-692cbb11-91a4-46a0-a536-84dce49fffea.png)
+
+En la consola del browser pueden ir viendo cómo va insertando
+
+![Consola web](https://user-images.githubusercontent.com/26606912/186034082-1efe31ae-2724-4f3e-91aa-25f7714fefc3.png)
+
+
+
