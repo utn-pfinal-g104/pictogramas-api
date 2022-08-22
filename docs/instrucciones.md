@@ -24,18 +24,8 @@
 	![image](https://user-images.githubusercontent.com/26606912/186019642-1268fd69-799c-4bd2-a90d-654a8b8d8b17.png)
 
 	Ejemplo de archivo con los puntos b y c modificados:
-	`
-	{
-  "ConnectionStrings": {
-    "SqlConnection": "server=DESKTOP-RIB4UPV;database=pictogramasdblocal;Trusted_Connection=True;TrustServerCertificate=True;"
-  },
-  "Storage": {
-    "ConnectionString": "AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;",
-    "Container": "pictogramas"
-  }
-}
+	![appsettings.development.json](https://user-images.githubusercontent.com/26606912/186031924-8cbbb8a1-7ef0-4c3b-a6c9-9cdf165fdd64.png)
 
-`
 
 6) Una vez que levanten la Api, ejecutar **GET** sobre el endpoint https://localhost:5001/pictogramas/guardar, que comenzará con el proceso de completar la base de datos y la descarga de pictogramas. Es un proceso que demora bastante porque realiza también los insert en el storaga, así que dejenlo corriendo y vayan a tomar un café ☕
 
