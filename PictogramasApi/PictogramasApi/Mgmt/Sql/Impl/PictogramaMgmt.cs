@@ -75,6 +75,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public async Task EliminarPictogramas()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from pictogramas"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<Pictograma>> ObtenerInformacionPictogramas(int? usuarioId)
         {
             try
@@ -86,10 +103,10 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     string sql;
                     if(usuarioId != null)
-                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag) where (p.IdUsuario = {usuarioId} or p.IdUsuario is null)";
+                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria)  where (p.IdUsuario = {usuarioId} or p.IdUsuario is null)";
                     else
-                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag) where p.IdUsuario is null";
-                    var pictogramas = await connection.QueryAsync<Pictograma, PictogramaPorCategoria, PictogramaPorTag, PalabraClave, Categoria, Tag, Pictograma>(sql, (p, pc, pt, k, c, t) => {
+                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) where p.IdUsuario is null";
+                    var pictogramas = await connection.QueryAsync<Pictograma, PictogramaPorCategoria, PalabraClave, Categoria, Pictograma>(sql, (p, pc, k, c ) => {
                         var picto = pics.FirstOrDefault(pic => pic.Id == p.Id);
                         if (c != null)
                         {
@@ -100,17 +117,6 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                             }
                             else
                                 picto.Categorias = new List<Categoria> { c };
-                        }
-
-                        if (t != null)
-                        {
-                            if (picto.Tags != null)
-                            {
-                                if (!picto.Tags.Any(tag => tag.Id == t.Id))
-                                    picto.Tags.Add(t);
-                            }
-                            else
-                                picto.Tags = new List<Tag> { t };
                         }
 
                         if (k != null)

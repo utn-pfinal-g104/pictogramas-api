@@ -67,6 +67,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
+        public async Task EliminarRelaciones()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from pictogramasporcategorias"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<PictogramaPorCategoria>> ObtenerPictogramasPorCategoria(int categoria)
         {
             try

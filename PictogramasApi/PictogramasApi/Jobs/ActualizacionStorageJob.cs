@@ -18,14 +18,12 @@ namespace PictogramasApi.Jobs
         private readonly IStorageMgmt _storageMgmt;
         private readonly ICategoriaMgmt _categoriaMgmt;
         private readonly IPalabraClaveMgmt _palabraClaveMgmt;
-        private readonly ITagMgmt _tagMgmt;
-        private readonly IPictogramaPorTagMgmt _pictogramaPorTagMgmt;
         private readonly IPictogramaPorCategoriaMgmt _pictogramaPorCategoriaMgmt;
 
         private readonly ArasaacService _arasaacService;
 
-        public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt, ITagMgmt tagMgmt,
-            IPalabraClaveMgmt palabraClaveMgmt, IPictogramaPorTagMgmt pictogramaPorTagMgmt,
+        public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt, 
+            IPalabraClaveMgmt palabraClaveMgmt,
             IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt, ArasaacService arasaacService,
             IStorageMgmt storageMgmt, ICategoriaMgmt categoriaMgmt)
         {
@@ -33,8 +31,6 @@ namespace PictogramasApi.Jobs
             _storageMgmt = storageMgmt;
             _categoriaMgmt = categoriaMgmt;
             _palabraClaveMgmt = palabraClaveMgmt;
-            _tagMgmt = tagMgmt;
-            _pictogramaPorTagMgmt = pictogramaPorTagMgmt;
             _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
 
             _arasaacService = arasaacService;
@@ -58,6 +54,12 @@ namespace PictogramasApi.Jobs
             List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
             List<Tag> tags = ObtenerTags(pictogramasArasaac);
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
+
+            //// ELIMINAR REGISTROS ACTUALES
+            await _categoriaMgmt.EliminarCategorias();
+            await _pictogramaMgmt.EliminarPictogramas();
+            await _pictogramaPorCategoriaMgmt.EliminarRelaciones();
+            await _palabraClaveMgmt.EliminarPalabrasClaves();
 
             //// INSERT CATEGORIAS
             //Unificacion de categorias y tags
@@ -146,25 +148,6 @@ namespace PictogramasApi.Jobs
                 throw ex;
             }
         }
-
-        private static List<PictogramaPorTag> ObtenerPictogramasPorTags(List<Tag> tags, List<Pictograma> pictogramas, List<Model.Responses.Pictograma> pictogramasArasaac)
-        {
-            List<PictogramaPorTag> picsXtags = new List<PictogramaPorTag>();
-            foreach (var pictograma in pictogramasArasaac)
-            {
-                foreach (var tag in pictograma.tags)
-                {
-                    if (tag != null)
-                        picsXtags.Add(new PictogramaPorTag
-                        {
-                            IdTag = tags.FirstOrDefault(t => t.Nombre == tag).Id,
-                            IdPictograma = (int)pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
-                        });
-                }
-            }
-            return picsXtags;
-        }
-
         private List<Pictograma> MapearPictogramas(List<Model.Responses.Pictograma> pictogramasArasaac)
         {
             List<Pictograma> pictogramas = new List<Pictograma>();

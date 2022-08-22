@@ -55,8 +55,6 @@ namespace PictogramasApi
             services.AddSingleton<IPictogramaMgmt, PictogramaMgmt>();
             services.AddSingleton<IPalabraClaveMgmt, PalabraClaveMgmt>();
             services.AddSingleton<IPictogramaPorCategoriaMgmt, PictogramaPorCategoriaMgmt>();
-            services.AddSingleton<IPictogramaPorTagMgmt, PictogramaPorTagMgmt>();
-            services.AddSingleton<ITagMgmt, TagMgmt>();
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
 
             services.AddSingleton<ArasaacService>();

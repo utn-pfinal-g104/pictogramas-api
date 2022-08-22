@@ -70,6 +70,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public async Task EliminarPalabrasClaves()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from keywords"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<PalabraClave> ObtenerKeyword(string palabra)
         {
             try

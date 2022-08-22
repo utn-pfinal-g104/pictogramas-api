@@ -11,5 +11,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         Task<List<Categoria>> ObtenerCategorias();
         Task<Categoria> ObtenerCategoria(string nombre);
         Task<int> ObtenerTotalCategorias();
+        Task EliminarCategorias();
     }
 }

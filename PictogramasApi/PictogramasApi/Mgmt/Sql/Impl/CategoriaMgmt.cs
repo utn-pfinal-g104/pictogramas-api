@@ -116,5 +116,22 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw ex;
             }
         }
+
+        public async Task EliminarCategorias()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from categorias"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }
