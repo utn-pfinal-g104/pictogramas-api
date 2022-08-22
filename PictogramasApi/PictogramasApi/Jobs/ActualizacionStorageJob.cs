@@ -128,12 +128,19 @@ namespace PictogramasApi.Jobs
                         {
                             foreach (var tag in pictograma.tags)
                             {
-                                if (!pictograma.categories.Any(c => c == tag))
-                                    picsXcats.Add(new PictogramaPorCategoria
+                                if (tag != null && !pictograma.categories.Any(c => c == tag))
+                                    try
                                     {
-                                        IdCategoria = categorias.FirstOrDefault(c => c.Nombre == tag).Id,
-                                        IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
-                                    });
+                                        picsXcats.Add(new PictogramaPorCategoria
+                                        {
+                                            IdCategoria = categorias.FirstOrDefault(c => c.Nombre == tag).Id,
+                                            IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                                        });
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                    }
                             }
                         }
                     }
