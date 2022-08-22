@@ -41,6 +41,7 @@ Respuesta de postman al finalizar:
 ![click para descargar pictogramas a la indexDB](https://user-images.githubusercontent.com/26606912/186033257-692cbb11-91a4-46a0-a536-84dce49fffea.png)
 
 En la consola del browser pueden ir viendo cómo va insertando
+
 ![Consola web](https://user-images.githubusercontent.com/26606912/186034082-1efe31ae-2724-4f3e-91aa-25f7714fefc3.png)
 
 
