@@ -7,13 +7,13 @@
 	- Microsoft Azure Storage Explorer (es una interfaz gráfica para ver el storage)
 	- npm
 
-2) Crear tablas en Base de datos. Ejecutar el script
+2) Crear Base de datos. Ejecutar el script
 
 3) Clonar [ApiPictogar](https://github.com/utn-pfinal-g104/pictogramas-api.git) y [WebPictogar](https://github.com/utn-pfinal-g104/pictogramas-web.git).
 
-4) Correr Storage Emulator. Abrir Storage Explorer y crear la carpeta pictogramas para que sea ahí donde la api vaya guardando los recursos allí.
+4) Correr Storage Emulator. Abrir Storage Explorer y crear contenedor de blobs `pictogramas` para que sea ahí donde la api vaya guardando los recursos allí.
 
-5) Levantar la Api, pero antes completar los siguientes 3 pasos:
+5) Levantar la Api, pero antes completar los siguientes **3 pasos**:
 	a - Comentar la excepción del archivo ActualizacionStorageJob, en el método ActualizarPictogramas.
 	b - Cambiar ConnectionString de appsettings.development.json para que apunte a su base de datos local.
 	![image](https://user-images.githubusercontent.com/26606912/186019466-171c22b9-7ed0-4b75-8a8e-f578d281b27c.png)
