@@ -6,5 +6,8 @@ namespace PictogramasApi.Configuration
     {
         public const string Section = "WebServices";
         public String ArasaacUri { get; set; }
+        public String MicrosoftTranslator { get; set; }
+        public String MicrosoftTranslatorKey { get; set; }
+        public String MicrosoftTranslatorRegion { get; set; }
     }
 }
