@@ -58,6 +58,7 @@ namespace PictogramasApi
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
 
             services.AddSingleton<ArasaacService>();
+            services.AddSingleton<GoogleTranslateService>();
 
             // Add Quartz services
             services.AddSingleton<IJobFactory, SingletonJobFactory>();

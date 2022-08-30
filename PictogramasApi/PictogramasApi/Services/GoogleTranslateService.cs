@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PictogramasApi.Configuration;
+using PictogramasApi.Model.Responses;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +26,7 @@ namespace PictogramasApi.Services
             object[] body1 = new object[] { new { Text = textoOriginal } };
             var requestBody1 = JsonConvert.SerializeObject(body1);
             string result;
+            TraduccionResponse traduccion;
             using (var client = new HttpClient())
             using (var request1 = new HttpRequestMessage())
             {
@@ -38,9 +41,10 @@ namespace PictogramasApi.Services
                 HttpResponseMessage response = await client.SendAsync(request1).ConfigureAwait(false);
                 // Read response as a string.
                 result = await response.Content.ReadAsStringAsync();
+                traduccion = JsonConvert.DeserializeObject<List<TraduccionResponse>>(result)[0];
             }
 
-            object[] body2 = new object[] { new { Text = result } };
+            object[] body2 = new object[] { new { Text = traduccion.Translations[0].Text } };
             var requestBody2 = JsonConvert.SerializeObject(body2);
             using (var client = new HttpClient())
             using (var request = new HttpRequestMessage())
@@ -56,9 +60,10 @@ namespace PictogramasApi.Services
                 HttpResponseMessage response = await client.SendAsync(request).ConfigureAwait(false);
                 // Read response as a string.
                 result = await response.Content.ReadAsStringAsync();
+                traduccion = JsonConvert.DeserializeObject<List<TraduccionResponse>>(result)[0];
             }
 
-            return result;
+            return traduccion.Translations[0].Text;
         }
     }
 }
