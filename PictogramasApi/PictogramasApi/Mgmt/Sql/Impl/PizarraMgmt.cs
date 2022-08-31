@@ -46,6 +46,10 @@ namespace PictogramasApi.Mgmt.Sql.Impl
 
                     pgAnd.Predicates.Add(Predicates.Field<Pizarra>(p => p.UsuarioId, Operator.Eq, usuarioId));
                     List<Pizarra> pizarras = connection.GetList<Pizarra>(pgAnd).ToList();
+                    foreach(var p in pizarras)
+                    {
+                        p.Celdas = ObtenerCeldasDePizarra(p.Id);
+                    }
                     connection.Close();
                     return pizarras;
                 }

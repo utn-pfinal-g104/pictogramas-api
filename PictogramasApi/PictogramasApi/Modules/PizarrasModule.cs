@@ -26,7 +26,7 @@ namespace PictogramasApi.Modules
             Get("/{usuarioId:int}", async (ctx) =>
             {
                 var usuarioId = ctx.Request.RouteValues.As<int>("usuarioId");
-                var pizarras = _pizarraMgmt.ObtenerPizarras(usuarioId);
+                var pizarras = _pizarraMgmt.ObtenerPizarras(usuarioId);                   
                 await ctx.Response.Negotiate(pizarras);
             });
         }
