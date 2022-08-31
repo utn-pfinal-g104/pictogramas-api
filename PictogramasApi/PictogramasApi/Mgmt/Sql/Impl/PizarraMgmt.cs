@@ -60,5 +60,48 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             throw new NotImplementedException();
         }
+
+        public List<CeldaPizarra> ObtenerCeldasDePizarra(int pizarraId)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+
+                    pgAnd.Predicates.Add(Predicates.Field<CeldaPizarra>(c => c.PizarraId, Operator.Eq, pizarraId));
+                    List<CeldaPizarra> celdas = connection.GetList<CeldaPizarra>(pgAnd).ToList();
+                    connection.Close();
+                    return celdas;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public Pizarra GuardarCeldasDePizarra(Pizarra pizarra)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    foreach(var celda in pizarra.Celdas)
+                    {
+                        celda.PizarraId = pizarra.Id;
+                        connection.Insert<CeldaPizarra>(celda);
+                    }
+                    connection.Close();
+                    return pizarra;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

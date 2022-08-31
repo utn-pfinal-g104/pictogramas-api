@@ -39,6 +39,7 @@ namespace PictogramasApi.Modules
                 {
                     var request = await ctx.Request.Bind<Pizarra>();
                     request = _pizarraMgmt.GuardarPizarra(request);
+                    _pizarraMgmt.GuardarCeldasDePizarra(request);
                     await ctx.Response.Negotiate(request);
                 }
                 catch (Exception ex)
