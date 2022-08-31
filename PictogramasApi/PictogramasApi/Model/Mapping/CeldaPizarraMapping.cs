@@ -14,6 +14,7 @@ namespace PictogramasApi.Model.Mapping
             Map(x => x.TipoContenido).Column("TipoContenido");
             Map(x => x.Contenido).Column("Contenido");
             Map(x => x.Color).Column("Color");
+            Map(x => x.Identificacion).Column("Identificacion");
         }
     }
 }

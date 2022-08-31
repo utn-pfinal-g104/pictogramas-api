@@ -9,5 +9,6 @@
         public string Contenido { get; set; }
         public string TipoContenido { get; set; }
         public string Color { get; set; }
+        public string Identificacion { get; set; }
     }
 }
