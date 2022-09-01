@@ -233,5 +233,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw ex;
             }
         }
+
+        public async Task EliminarPictogramaPorIdUsuario(int pictogramaIdUsuario)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var query = $"delete from pictogramas where Idusuario = {pictogramaIdUsuario}";
+                    await Task.Run(() => connection.Execute(query));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
     }
 }
