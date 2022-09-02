@@ -61,13 +61,8 @@ namespace PictogramasApi.Jobs
             await _pictogramaPorCategoriaMgmt.EliminarRelaciones();
             await _palabraClaveMgmt.EliminarPalabrasClaves();
 
+            // TODO: Las categorias se deben insertar manualmente con ids definidos
             //// INSERT CATEGORIAS
-            //Unificacion de categorias y tags
-            foreach(var tag in tags)
-            {
-                if (!categorias.Any(c => c.Nombre == tag.Nombre))
-                    categorias.Add(new Categoria { Nombre = tag.Nombre });
-            }
             await _categoriaMgmt.AgregarCategorias(categorias);
 
             //// INSERT PICTOGRAMAS
@@ -80,6 +75,7 @@ namespace PictogramasApi.Jobs
             //// INSERT KEYWORDS
             await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
 
+            // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
             List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
             // Tambien agrega tags como categorias
             List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
@@ -117,32 +113,33 @@ namespace PictogramasApi.Jobs
                     {
                         picsXcats.Add(new PictogramaPorCategoria
                         {
-                            IdCategoria = categorias.FirstOrDefault(c => c.Nombre == categoria).Id,
+                            //TODO: Revisar - debe utilizarse el nombre en ingles para comparar
+                            IdCategoria = categorias.FirstOrDefault(c => c.NombreOriginal == categoria).Id,
                             IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
                         });
                     }
-
                     try
                     {
-                        if (pictograma.tags != null)
-                        {
-                            foreach (var tag in pictograma.tags)
-                            {
-                                if (tag != null && !pictograma.categories.Any(c => c == tag))
-                                    try
-                                    {
-                                        picsXcats.Add(new PictogramaPorCategoria
-                                        {
-                                            IdCategoria = categorias.FirstOrDefault(c => c.Nombre == tag).Id,
-                                            IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
-                                        });
-                                    }
-                                    catch (Exception ex)
-                                    {
+                        // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
+                        //if (pictograma.tags != null)
+                        //{
+                        //    foreach (var tag in pictograma.tags)
+                        //    {
+                        //        if (tag != null && !pictograma.categories.Any(c => c == tag))
+                        //            try
+                        //            {
+                        //                picsXcats.Add(new PictogramaPorCategoria
+                        //                {
+                        //                    IdCategoria = categorias.FirstOrDefault(c => c.Nombre == tag).Id,
+                        //                    IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                        //                });
+                        //            }
+                        //            catch (Exception ex)
+                        //            {
 
-                                    }
-                            }
-                        }
+                        //            }
+                        //    }
+                        //}
                     }
                     catch (Exception)
                     {
