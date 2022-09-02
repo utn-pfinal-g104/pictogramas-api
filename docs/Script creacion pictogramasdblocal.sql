@@ -191,6 +191,14 @@ CREATE TABLE [dbo].[Usuarios](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+
+Create table FavoritosPorUsuarios(
+Id int PRIMARY KEY,
+UsuarioId int FOREIGN KEY REFERENCES Usuarios(Id),
+PictogramaId int foreign key references Pictogramas(Id)
+)
+GO
+
 ALTER TABLE [dbo].[Categorias] ADD  DEFAULT ((0)) FOR [Nivel]
 GO
 ALTER TABLE [dbo].[Usuarios] ADD  DEFAULT ((0)) FOR [Nivel]
