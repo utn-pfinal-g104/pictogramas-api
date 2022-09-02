@@ -14,5 +14,8 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         Task<Pictograma> AgregarPictograma(Pictograma pictograma);
         Task<int> ObtenerTotalPictogramas(int usuarioId);
         Task EliminarPictogramas();
+        Task EliminarPictogramaPorIdUsuario(int pictogramaDeUsuarioId);
+        Task AgregarFavorito(int idUsuario, int idPictograma);
+        Task EliminarFavorito(int idUsuario, int idPictograma);
     }
 }
