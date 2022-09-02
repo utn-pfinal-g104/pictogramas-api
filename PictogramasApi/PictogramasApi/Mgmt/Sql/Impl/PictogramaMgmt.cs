@@ -234,14 +234,14 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task EliminarPictogramaPorIdUsuario(int pictogramaIdUsuario)
+        public async Task EliminarPictogramaPorIdUsuario(int pictogramaDeUsuarioId)
         {
             try
             {
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var query = $"delete from pictogramas where Idusuario = {pictogramaIdUsuario}";
+                    var query = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId}"; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac?
                     await Task.Run(() => connection.Execute(query));
                     connection.Close();
                 }

@@ -50,6 +50,7 @@ namespace PictogramasApi.Modules
             #region "BD"
             GetTotalPictogramas();
             GetInformacionPictogramas();
+            DeletePictogramaDeUsuario();
             #endregion "BD"
 
             #region "Storage"
@@ -251,6 +252,17 @@ namespace PictogramasApi.Modules
             }
             else
                 await ctx.Response.Negotiate("Error obteniendo el pictograma");
+        }
+
+        private void DeletePictogramaDeUsuario()
+        {
+            Delete("/pictogramasDeUsuario/{idPictogramaUsuario:minlength(1)}", async (ctx) =>
+            {
+                var idPictogramaUsuario = ctx.Request.RouteValues.As<int>("idPictogramaUsuario");
+
+                await _pictogramaMgmt.EliminarPictogramaPorIdUsuario(idPictogramaUsuario);
+                await ctx.Response.Negotiate("Pictograma eliminado de la base de datos");
+            });            
         }
     }
 }
