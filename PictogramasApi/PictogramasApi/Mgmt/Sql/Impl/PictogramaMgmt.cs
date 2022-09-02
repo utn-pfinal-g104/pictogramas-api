@@ -241,7 +241,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var query = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId}"; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac?
+                    var query = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId}"; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
                     await Task.Run(() => connection.Execute(query));
                     connection.Close();
                 }
@@ -252,5 +252,44 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
+        public async Task AgregarFavorito(int idUsuario, int idPictograma)
+        {
+            string insert = $"insert into FavoritosPorUsuarios (UsuarioId, PictogramaId) values ({idUsuario}, {idPictograma})";
+
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute(insert));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+        }
+
+        public async Task EliminarFavorito(int idUsuario, int idPictograma)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var query = $"delete from FavoritosPorUsuarios where UsuarioId = {idUsuario} and PictogramaId = {idPictograma}"; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
+                    await Task.Run(() => connection.Execute(query));
+                    connection.Close();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }
