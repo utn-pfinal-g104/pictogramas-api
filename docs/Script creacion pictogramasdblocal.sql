@@ -90,8 +90,10 @@ GO
 CREATE TABLE [dbo].[Categorias](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
 	[Nombre] [varchar](50) NOT NULL,
-	[Nivel] [int] NOT NULL,
- CONSTRAINT [PK_Categoria] PRIMARY KEY CLUSTERED 
+	[CategoriaPadre] [int] NULL,
+	[Nivel] [int] NULL,
+	[NombreOriginal] [varchar](50) NULL,
+CONSTRAINT [PK_Categoria] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -209,6 +211,59 @@ GO
 
 ALTER TABLE [dbo].[FavoritosPorUsuarios]  WITH CHECK ADD FOREIGN KEY([UsuarioId])
 REFERENCES [dbo].[Usuarios] ([Id])
+GO
+
+CREATE TABLE [dbo].[Pizarras](
+    [Id] [int] IDENTITY(1,1) NOT NULL,
+    [Filas] [int] NOT NULL,
+    [Columnas] [int] NOT NULL,
+    [UsuarioId] [int] NOT NULL,
+    [Nombre] [varchar](70) NOT NULL,
+ CONSTRAINT [PK_Pizarras] PRIMARY KEY CLUSTERED 
+(
+    [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Pizarras]  WITH CHECK ADD  CONSTRAINT [FK_Pizarras_Usuarios] FOREIGN KEY([UsuarioId])
+REFERENCES [dbo].[Usuarios] ([Id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[Pizarras] CHECK CONSTRAINT [FK_Pizarras_Usuarios]
+GO
+/** Object:  Table [dbo].[CeldaPizarra]    Script Date: 6/9/2022 19:52:07 **/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[CeldaPizarra](
+    [Id] [int] IDENTITY(1,1) NOT NULL,
+    [PizarraId] [int] NOT NULL,
+    [Fila] [int] NOT NULL,
+    [Columna] [int] NOT NULL,
+    [Contenido] [nvarchar](100) NULL,
+    [TipoContenido] [nvarchar](50) NULL,
+    [Color] [nvarchar](10) NULL,
+    [Identificacion] [nvarchar](50) NULL,
+ CONSTRAINT [PK_CeldaPizarra] PRIMARY KEY CLUSTERED 
+(
+    [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[CeldaPizarra]  WITH CHECK ADD  CONSTRAINT [FK_CeldaPizarra_Pizarras] FOREIGN KEY([PizarraId])
+REFERENCES [dbo].[Pizarras] ([Id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[CeldaPizarra] CHECK CONSTRAINT [FK_CeldaPizarra_Pizarras]
 GO
 
 
