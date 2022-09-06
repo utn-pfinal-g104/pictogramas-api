@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PictogramasApi.Mgmt.Sql.Impl
@@ -234,15 +235,21 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task EliminarPictogramaPorIdUsuario(int pictogramaDeUsuarioId)
+        public async Task EliminarPictogramaDeUsuario(int pictogramaDeUsuarioId)
         {
             try
             {
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var query = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId}"; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
-                    await Task.Run(() => connection.Execute(query));
+                    StringBuilder query = new StringBuilder();
+                    var pictogramasQuery = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId} "; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
+                    var favoritosPorUsuariosQuery = $"delete from pictogramasPorUsuarios pictogramaId = {pictogramaDeUsuarioId} ";
+                    var pictogramasPorCategoriasQuery = $"delete from pictogramas where IdPictograma = {pictogramaDeUsuarioId} ";
+                    query.Append(pictogramasQuery);
+                    query.Append(favoritosPorUsuariosQuery);
+                    query.Append(pictogramasPorCategoriasQuery);
+                    await Task.Run(() => connection.Execute(query.ToString()));
                     connection.Close();
                 }
             }
@@ -256,12 +263,20 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             string insert = $"insert into FavoritosPorUsuarios (UsuarioId, PictogramaId) values ({idUsuario}, {idPictograma})";
 
+            var fpu = new FavoritoPorUsuario()
+            {
+                IdUsuario = idUsuario,
+                IdPictograma = idPictograma
+            };
+
             try
             {
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    await Task.Run(() => connection.Execute(insert));
+                    //await Task.Run(() => connection.Execute(insert));
+                    await Task.Run(() => connection.Insert(fpu));
+
                     connection.Close();
                 }
             }

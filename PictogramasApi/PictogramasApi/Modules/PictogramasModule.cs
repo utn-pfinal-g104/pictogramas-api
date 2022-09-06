@@ -263,14 +263,14 @@ namespace PictogramasApi.Modules
             {
                 var idPictogramaUsuario = ctx.Request.RouteValues.As<int>("idPictogramaUsuario");
 
-                await _pictogramaMgmt.EliminarPictogramaPorIdUsuario(idPictogramaUsuario);
+                await _pictogramaMgmt.EliminarPictogramaDeUsuario(idPictogramaUsuario);
                 await ctx.Response.Negotiate("Pictograma eliminado de la base de datos");
             });            
         }
 
         private void InsertFavorito()
         {
-            Post("favoritos/{idUsuario:minlength(1)}/{idPictograma:minlength(1)}", async (ctx) =>
+            Post("/favoritos/{idUsuario:minlength(1)}/{idPictograma:minlength(1)}", async (ctx) =>
             {
                 var idPictograma = ctx.Request.RouteValues.As<int>("idPictograma");
                 var idUsuario = ctx.Request.RouteValues.As<int>("idUsuario");
@@ -282,7 +282,7 @@ namespace PictogramasApi.Modules
 
         private void DeleteFavorito()
         {
-            Delete("favoritos/{idUsuario:minlength(1)}/{idPictograma:minlength(1)}", async (ctx) =>
+            Delete("/favoritos/{idUsuario:minlength(1)}/{idPictograma:minlength(1)}", async (ctx) =>
             {
                 var idPictograma = ctx.Request.RouteValues.As<int>("idPictograma");
                 var idUsuario = ctx.Request.RouteValues.As<int>("idUsuario");
