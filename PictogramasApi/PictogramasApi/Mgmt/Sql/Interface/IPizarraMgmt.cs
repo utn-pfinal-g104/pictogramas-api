@@ -10,5 +10,8 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         public List<Pizarra> ObtenerPizarras(int usuarioId);
         public List<CeldaPizarra> ObtenerCeldasDePizarra(int pizarraId);
         public Pizarra GuardarCeldasDePizarra(Pizarra pizarra);
+        public void ActualizarCeldasDePizarra(Pizarra pizarra);
+        public void ActualizarPizarra(Pizarra pizarra);
+        public void BorrarPizarra(int pizarraId);
     }
 }

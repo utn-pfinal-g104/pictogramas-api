@@ -107,5 +107,59 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw ex;
             }
         }
+
+        public void ActualizarPizarra(Pizarra pizarra)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    connection.Update<Pizarra>(pizarra);
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public void BorrarPizarra(int pizarraId)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    connection.Delete<Pizarra>(pizarraId);
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public void ActualizarCeldasDePizarra(Pizarra pizarra)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    foreach (var celda in pizarra.Celdas)
+                    {
+                        connection.Update<CeldaPizarra>(celda);
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

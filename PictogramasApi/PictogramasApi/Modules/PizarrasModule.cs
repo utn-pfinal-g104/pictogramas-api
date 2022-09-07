@@ -19,6 +19,8 @@ namespace PictogramasApi.Modules
 
             GetPizarras();
             PostPizarra();
+            PutPizarra();
+            DeletePizarra();
         }
 
         private void GetPizarras()
@@ -45,7 +47,44 @@ namespace PictogramasApi.Modules
                 catch (Exception ex)
                 {
                     ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    await ctx.Response.Negotiate("");
+                    await ctx.Response.Negotiate("Error en creacion");
+                }
+            });
+        }
+
+        private void PutPizarra()
+        {
+            Put("/", async (ctx) =>
+            {
+                try
+                {
+                    var request = await ctx.Request.Bind<Pizarra>();
+                    _pizarraMgmt.ActualizarPizarra(request);
+                    _pizarraMgmt.GuardarCeldasDePizarra(request);
+                    await ctx.Response.Negotiate("Pizarra Actualizada");
+                }
+                catch (Exception ex)
+                {
+                    ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    await ctx.Response.Negotiate("Error en actualizacion");
+                }
+            });
+        }
+
+        private void DeletePizarra()
+        {
+            Delete("/{pizarraId:int}", async (ctx) =>
+            {
+                try
+                {
+                    var id = ctx.Request.RouteValues.As<int>("pizarraId");
+                    _pizarraMgmt.BorrarPizarra(id);
+                    await ctx.Response.Negotiate("Pizarra Eliminada");
+                }
+                catch (Exception ex)
+                {
+                    ctx.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    await ctx.Response.Negotiate("Error en eliminacion");
                 }
             });
         }

@@ -90,6 +90,7 @@ namespace PictogramasApi.Jobs
             {
                 foreach (var pictograma in pictogramasArasaac)
                 {
+                    //TODO: Aca podriamos tirar grupos de tasks que corran en simultaneo para acelerar el proceso
                     var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
                     _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
                     Console.WriteLine($"Se inserto pictograma: {pictograma._id}");
