@@ -45,6 +45,7 @@ namespace PictogramasApi.Jobs
 
         internal async Task ActualizarPictogramas()
         {
+            // Se comenta y descomenta lo que se desea utilizar
             // Dejo esto hasta que el metodo este finalizado
             throw new NotImplementedException();
 
@@ -56,24 +57,24 @@ namespace PictogramasApi.Jobs
             List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
             //// ELIMINAR REGISTROS ACTUALES
-            await _categoriaMgmt.EliminarCategorias();
-            await _pictogramaMgmt.EliminarPictogramas();
-            await _pictogramaPorCategoriaMgmt.EliminarRelaciones();
-            await _palabraClaveMgmt.EliminarPalabrasClaves();
+            //await _categoriaMgmt.EliminarCategorias();
+            //await _pictogramaMgmt.EliminarPictogramas();
+            //await _pictogramaPorCategoriaMgmt.EliminarRelaciones();
+            //await _palabraClaveMgmt.EliminarPalabrasClaves();
 
             // TODO: Las categorias se deben insertar manualmente con ids definidos
             //// INSERT CATEGORIAS
-            await _categoriaMgmt.AgregarCategorias(categorias);
+            //await _categoriaMgmt.AgregarCategorias(categorias);
 
             //// INSERT PICTOGRAMAS
-            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
+            //await _pictogramaMgmt.AgregarPictogramas(pictogramas);
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
-            foreach (var keyword in palabrasClaves)
-                keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;
+            //foreach (var keyword in palabrasClaves)
+            //    keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;
 
             //// INSERT KEYWORDS
-            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+            //await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
 
             // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
             List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
@@ -85,21 +86,21 @@ namespace PictogramasApi.Jobs
             await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
 
             //Guardar imagenes en Storage
-            List<Stream> pictogramasAsStreams = new List<Stream>();
-            try
-            {
-                foreach (var pictograma in pictogramasArasaac)
-                {
-                    //TODO: Aca podriamos tirar grupos de tasks que corran en simultaneo para acelerar el proceso
-                    var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
-                    _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
-                    Console.WriteLine($"Se inserto pictograma: {pictograma._id}");
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            //List<Stream> pictogramasAsStreams = new List<Stream>();
+            //try
+            //{
+            //    foreach (var pictograma in pictogramasArasaac)
+            //    {
+            //        //TODO: Aca podriamos tirar grupos de tasks que corran en simultaneo para acelerar el proceso
+            //        var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
+            //        _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
+            //        Console.WriteLine($"Se inserto pictograma: {pictograma._id}");
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    throw e;
+            //}
         }
 
         // Tambien agrega tags como categorias
@@ -112,12 +113,19 @@ namespace PictogramasApi.Jobs
                 {
                     foreach (var categoria in pictograma.categories)
                     {
-                        picsXcats.Add(new PictogramaPorCategoria
+                        try
                         {
-                            //TODO: Revisar - debe utilizarse el nombre en ingles para comparar
-                            IdCategoria = categorias.FirstOrDefault(c => c.NombreOriginal == categoria).Id,
-                            IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
-                        });
+                            picsXcats.Add(new PictogramaPorCategoria
+                            {
+                                //TODO: Revisar - debe utilizarse el nombre en ingles para comparar
+                                IdCategoria = categorias.FirstOrDefault(c => c.NombreOriginal == categoria).Id,
+                                IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
+                            });
+                        }
+                        catch(Exception ex)
+                        {
+
+                        }
                     }
                     try
                     {
