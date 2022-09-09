@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int PizarraId { get; set; }
+        public int UsuarioId { get; set; }
         public int Fila { get; set; }
         public int Columna { get; set; }
         public string Contenido { get; set; }

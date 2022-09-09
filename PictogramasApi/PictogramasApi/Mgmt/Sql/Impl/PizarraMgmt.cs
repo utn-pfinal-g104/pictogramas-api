@@ -48,7 +48,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     List<Pizarra> pizarras = connection.GetList<Pizarra>(pgAnd).ToList();
                     foreach(var p in pizarras)
                     {
-                        p.Celdas = ObtenerCeldasDePizarra(p.Id);
+                        p.Celdas = ObtenerCeldasDePizarra(p.Id, p.UsuarioId);
                     }
                     connection.Close();
                     return pizarras;
@@ -65,7 +65,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             throw new NotImplementedException();
         }
 
-        public List<CeldaPizarra> ObtenerCeldasDePizarra(int pizarraId)
+        public List<CeldaPizarra> ObtenerCeldasDePizarra(int pizarraId, int usuarioId)
         {
             try
             {
@@ -75,6 +75,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
 
                     pgAnd.Predicates.Add(Predicates.Field<CeldaPizarra>(c => c.PizarraId, Operator.Eq, pizarraId));
+                    pgAnd.Predicates.Add(Predicates.Field<CeldaPizarra>(c => c.UsuarioId, Operator.Eq, usuarioId));
                     List<CeldaPizarra> celdas = connection.GetList<CeldaPizarra>(pgAnd).ToList();
                     connection.Close();
                     return celdas;
@@ -96,6 +97,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     foreach(var celda in pizarra.Celdas)
                     {
                         celda.PizarraId = pizarra.Id;
+                        celda.UsuarioId = pizarra.UsuarioId;
                         connection.Insert<CeldaPizarra>(celda);
                     }
                     connection.Close();

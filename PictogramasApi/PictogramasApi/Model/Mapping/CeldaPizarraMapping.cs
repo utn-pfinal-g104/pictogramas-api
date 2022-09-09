@@ -9,6 +9,7 @@ namespace PictogramasApi.Model.Mapping
             Table("CeldaPizarra");
             Map(x => x.Id).Column("Id").Key(KeyType.Identity);
             Map(x => x.PizarraId).Column("PizarraId");
+            Map(x => x.UsuarioId).Column("UsuarioId");
             Map(x => x.Fila).Column("Fila");
             Map(x => x.Columna).Column("Columna");
             Map(x => x.TipoContenido).Column("TipoContenido");
