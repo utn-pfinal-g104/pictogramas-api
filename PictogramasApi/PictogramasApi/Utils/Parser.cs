@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 
 namespace PictogramasApi.Utils
 {
@@ -17,6 +16,14 @@ namespace PictogramasApi.Utils
             }
 
             return Convert.ToBase64String(bytes);
+        }
+
+        public static Stream ConvertFromBase64(this string base64)
+        {
+            var bytes = Convert.FromBase64String(base64);
+
+            Stream stream = new MemoryStream(bytes);
+            return stream;
         }
     }
 }

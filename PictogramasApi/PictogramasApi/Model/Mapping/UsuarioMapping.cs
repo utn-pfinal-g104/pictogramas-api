@@ -17,6 +17,7 @@ namespace PictogramasApi.Model.Mapping
             Map(x => x.Aac).Column("Aac");
             Map(x => x.AacColor).Column("AacColor");
             Map(x => x.Hair).Column("Hair");//TODO agregar campo en la bd de azure
+            Map(x => x.Nivel).Column("Nivel");
         }
     }
 }

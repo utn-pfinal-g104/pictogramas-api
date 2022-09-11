@@ -15,5 +15,6 @@ namespace PictogramasApi.Model
         public bool AacColor { get; set; }
         public bool Skin { get; set; }
         public bool Hair { get; set; }
+        public int Nivel { get; set; }
     }
 }

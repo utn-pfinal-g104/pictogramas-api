@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PictogramasApi.Mgmt.Sql.Impl
@@ -18,6 +19,24 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         public PictogramaMgmt(DapperContext context)
         {
             _context = context;
+        }
+
+        public async Task<Pictograma> AgregarPictograma(Pictograma pictograma)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Insert(pictograma));
+                    connection.Close();
+                    return pictograma;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task AgregarPictogramas(List<Pictograma> pictogramas)
@@ -57,17 +76,38 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
-        public async Task<List<Pictograma>> ObtenerInformacionPictogramas()
+        public async Task EliminarPictogramas()
         {
             try
             {
-                var pics = await ObtenerPictogramas();
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from pictogramas"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task<List<Pictograma>> ObtenerInformacionPictogramas(int? usuarioId)
+        {
+            try
+            {
+                var pics = await ObtenerPictogramas(usuarioId);
 
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join PictogramasPorTags pt on (pt.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) left join Tags t on (t.Id = pt.IdTag)";
-                    var pictogramas = await connection.QueryAsync<Pictograma, PictogramaPorCategoria, PictogramaPorTag, PalabraClave, Categoria, Tag, Pictograma>(sql, (p, pc, pt, k, c, t) => {
+                    string sql;
+                    if(usuarioId != null)
+                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria)  where (p.IdUsuario = {usuarioId} or p.IdUsuario is null)";
+                    else
+                        sql = $"select * from pictogramas p left join PictogramasPorCategorias pc on (pc.IdPictograma = p.Id) left join keywords k on (k.IdPictograma = p.Id) left join Categorias c on (c.Id = pc.IdCategoria) where p.IdUsuario is null";
+                    var pictogramas = await connection.QueryAsync<Pictograma, PictogramaPorCategoria, PalabraClave, Categoria, Pictograma>(sql, (p, pc, k, c ) => {
                         var picto = pics.FirstOrDefault(pic => pic.Id == p.Id);
                         if (c != null)
                         {
@@ -78,17 +118,6 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                             }
                             else
                                 picto.Categorias = new List<Categoria> { c };
-                        }
-
-                        if (t != null)
-                        {
-                            if (picto.Tags != null)
-                            {
-                                if (!picto.Tags.Any(tag => tag.Id == t.Id))
-                                    picto.Tags.Add(t);
-                            }
-                            else
-                                picto.Tags = new List<Tag> { t };
                         }
 
                         if (k != null)
@@ -116,14 +145,18 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task<List<Pictograma>> ObtenerPictogramas()
+        public async Task<List<Pictograma>> ObtenerPictogramas(int? usuarioId)
         {
             try
             {                
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pictogramas = (await connection.GetListAsync<Pictograma>()).ToList();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, null));
+                    if (usuarioId != null)
+                        pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, usuarioId));
+                    var pictogramas = (connection.GetList<Pictograma>(pgAnd)).ToList();
                     connection.Close();
                     return pictogramas;
                 }
@@ -168,14 +201,109 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pictogramas = await connection.CountAsync<Pictograma>();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, null));
+                    var cantidadPictogramas = (connection.GetList<Pictograma>(pgAnd)).Count();
                     connection.Close();
-                    return pictogramas;
+                    return cantidadPictogramas;
                 }
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+
+        public async Task<int> ObtenerTotalPictogramas(int usuarioId)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, usuarioId));
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, null));
+                    var cantidadPictogramas = (connection.GetList<Pictograma>(pgAnd)).Count();
+                    connection.Close();
+                    return cantidadPictogramas;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task EliminarPictogramaDeUsuario(int pictogramaDeUsuarioId)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    StringBuilder query = new StringBuilder();
+                    var pictogramasQuery = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId} "; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
+                    var favoritosPorUsuariosQuery = $"delete from pictogramasPorUsuarios pictogramaId = {pictogramaDeUsuarioId} ";
+                    var pictogramasPorCategoriasQuery = $"delete from pictogramas where IdPictograma = {pictogramaDeUsuarioId} ";
+                    query.Append(pictogramasQuery);
+                    query.Append(favoritosPorUsuariosQuery);
+                    query.Append(pictogramasPorCategoriasQuery);
+                    await Task.Run(() => connection.Execute(query.ToString()));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task AgregarFavorito(int idUsuario, int idPictograma)
+        {
+            string insert = $"insert into FavoritosPorUsuarios (UsuarioId, PictogramaId) values ({idUsuario}, {idPictograma})";
+
+            var fpu = new FavoritoPorUsuario()
+            {
+                IdUsuario = idUsuario,
+                IdPictograma = idPictograma
+            };
+
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    //await Task.Run(() => connection.Execute(insert));
+                    await Task.Run(() => connection.Insert(fpu));
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+        }
+
+        public async Task EliminarFavorito(int idUsuario, int idPictograma)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var query = $"delete from FavoritosPorUsuarios where UsuarioId = {idUsuario} and PictogramaId = {idPictograma}"; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
+                    await Task.Run(() => connection.Execute(query));
+                    connection.Close();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

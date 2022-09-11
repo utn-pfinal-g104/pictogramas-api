@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -50,6 +49,41 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public async Task AgregarRelaciones(Pictograma pictograma, List<Categoria> categorias)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    foreach (var categoria in categorias)
+                        connection.Insert(new PictogramaPorCategoria { IdCategoria = categoria.Id, IdPictograma = pictograma.Id });
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task EliminarRelaciones()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from pictogramasporcategorias"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<PictogramaPorCategoria>> ObtenerPictogramasPorCategoria(int categoria)
         {
             try
@@ -59,7 +93,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     pgAnd.Predicates.Add(Predicates.Field<PictogramaPorCategoria>(p => p.IdCategoria, Operator.Eq, categoria));
-                    var picsXcat = (await connection.GetListAsync<PictogramaPorCategoria>(pgAnd)).ToList();
+                    var picsXcat = (connection.GetList<PictogramaPorCategoria>(pgAnd)).ToList();
                     connection.Close();
                     return picsXcat;
                 }

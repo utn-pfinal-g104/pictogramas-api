@@ -1,5 +1,4 @@
-﻿
-namespace PictogramasApi.Model
+﻿namespace PictogramasApi.Model
 {
     public class Tag
     {

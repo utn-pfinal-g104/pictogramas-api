@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DapperExtensions;
-using DapperExtensions.Predicate;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -19,6 +18,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         public PalabraClaveMgmt(DapperContext context)
         {
             _context = context;
+        }
+
+        public async Task AgregarPalabraClave(Pictograma pictograma, string keyword)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    connection.Insert(new PalabraClave { Keyword = keyword, IdPictograma = pictograma.Id, Meaning = "", Tipo= 0, Plural="", HasLocution=false });
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task AgregarPalabrasClaves(List<PalabraClave> palabrasClaves)
@@ -54,6 +70,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public async Task EliminarPalabrasClaves()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute("delete from keywords"));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<PalabraClave> ObtenerKeyword(string palabra)
         {
             try
@@ -63,7 +96,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                     connection.Open();
                     var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
                     pgAnd.Predicates.Add(Predicates.Field<PalabraClave>(p => p.Keyword, Operator.Eq, palabra));
-                    var keyword = (await connection.GetListAsync<PalabraClave>(pgAnd)).FirstOrDefault();
+                    var keyword = (connection.GetList<PalabraClave>(pgAnd)).FirstOrDefault();
                     connection.Close();
                     return keyword;
                 }
@@ -81,7 +114,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var tags = (await connection.GetListAsync<PalabraClave>()).ToList();
+                    var tags = (connection.GetList<PalabraClave>()).ToList();
                     connection.Close();
                     return tags;
                 }
