@@ -136,7 +136,7 @@ namespace PictogramasApi.Modules
 
                 Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, password);
                 if (usuario == null)
-                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel=0 });
+                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { Identificador= usuarioRequest.Identificador, NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel=0 });
 
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson(usuario);

@@ -8,6 +8,7 @@ namespace PictogramasApi.Model.Mapping
         {
             Table("Usuarios");
             Map(x => x.Id).Column("Id").Key(KeyType.Identity);
+            Map(x => x.Identificador).Column("Identificador");
             Map(x => x.NombreUsuario).Column("Usuario");
             Map(x => x.Password).Column("Password");
             Map(x => x.Schematic).Column("Schematic");

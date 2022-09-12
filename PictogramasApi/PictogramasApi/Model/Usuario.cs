@@ -6,6 +6,7 @@ namespace PictogramasApi.Model
     {
         // Es int64 porque sino fallaba dapper extensions con el insert async
         public Int64 Id { get; set; }
+        public string Identificador { get; set; }
         public string NombreUsuario { get; set; }
         public string Password { get; set; }
         public bool Schematic { get; set; }

@@ -9,5 +9,6 @@ namespace PictogramasApi.Model.Requests
     {
         public string NombreUsuario { get; set; }
         public string Password { get; set; }
+        public string Identificador { get; set; }
     }
 }
