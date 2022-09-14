@@ -28,6 +28,15 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
+                    if (pictograma.Identificador != null)
+                    {
+                        var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                        pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.Identificador, Operator.Eq, pictograma.Identificador));
+                        var p = (connection.GetList<Pictograma>(pgAnd)).FirstOrDefault();
+                        if (p != null)
+                            return p;
+                    }
+
                     await Task.Run(() => connection.Insert(pictograma));
                     connection.Close();
                     return pictograma;

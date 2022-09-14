@@ -17,5 +17,6 @@ namespace PictogramasApi.Model
         public bool Skin { get; set; }
         public bool Hair { get; set; }
         public int Nivel { get; set; }
+        public DateTime UltimaActualizacion { get; set; }
     }
 }

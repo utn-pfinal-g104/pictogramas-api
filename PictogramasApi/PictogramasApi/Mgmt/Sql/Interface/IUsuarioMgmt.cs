@@ -11,5 +11,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         Task<Usuario> CrearUsuario(Usuario usuario);
         Task<Usuario> GetUsuario(string username, string passwrod);
         Task ActualizarUsuario(Usuario usuario);
+        Usuario GetUsuarioPorIdentificador(string identificador);
     }
 }

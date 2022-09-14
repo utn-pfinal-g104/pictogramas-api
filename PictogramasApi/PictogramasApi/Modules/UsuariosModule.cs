@@ -37,6 +37,7 @@ namespace PictogramasApi.Modules
             PostUsuario();
             PatchUsuario();
             PostPictogramaDeUsuario();
+            GetUsuarioPorIdentificador();
         }
 
         private void PostPictogramaDeUsuario()
@@ -56,7 +57,9 @@ namespace PictogramasApi.Modules
                         Schematic = request.Schematic,
                         Sex = request.Sex,
                         Skin = request.Skin,
-                        Violence = request.Violence
+                        Violence = request.Violence,
+                        UltimaActualizacion = DateTime.Now,
+                        Identificador = idUsuario.ToString() + "_" + request.FileName
                     };
                     pictograma = await _pictogramaMgmt.AgregarPictograma(pictograma);
                     await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.CategoriasFiltradas);
@@ -100,6 +103,24 @@ namespace PictogramasApi.Modules
             });
         }
 
+        private void GetUsuarioPorIdentificador()
+        {
+            Get("/identificador/{identificador:minlength(1)}", async (ctx) =>
+            {
+                var identificador = ctx.Request.RouteValues.As<string>("identificador");
+                try
+                {
+                    Usuario usuario = _usuarioMgmt.GetUsuarioPorIdentificador(identificador);
+                    await ctx.Response.Negotiate(usuario);
+                }
+                catch (Exception ex)
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.AsJson(ex.Message);
+                }
+            });
+        }
+
         private void GetUsuarioPorUsernameYPassword()
         {
             Get("/{username:minlength(1)}/{password:minlength(1)}", async (ctx) =>
@@ -136,8 +157,10 @@ namespace PictogramasApi.Modules
 
                 Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, password);
                 if (usuario == null)
-                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { Identificador= usuarioRequest.Identificador, NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel=0 });
-
+                {
+                    usuario.UltimaActualizacion = DateTime.Now;
+                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { Identificador = usuarioRequest.Identificador, NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel = 0 });
+                }
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson(usuario);
             });
@@ -152,6 +175,7 @@ namespace PictogramasApi.Modules
                 var usuario = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
                 usuario.Password = Seguridad.sha256_hash(usuario.Password);
+                usuario.UltimaActualizacion = DateTime.Now;
                 await _usuarioMgmt.ActualizarUsuario(usuario);
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson("Usuario creado");

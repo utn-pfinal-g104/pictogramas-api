@@ -20,6 +20,7 @@ namespace PictogramasApi.Model.Mapping
             Map(x => x.Categorias).Ignore();
             Map(x => x.Tags).Ignore();
             Map(x => x.Keywords).Ignore();
+            Map(x => x.UltimaActualizacion).Column("UltimaActualizacion");
         }
     }
 }

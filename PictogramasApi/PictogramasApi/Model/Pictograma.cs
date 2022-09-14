@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 
@@ -17,6 +18,8 @@ namespace PictogramasApi.Model
         public bool Hair { get; set; }
         public int? IdArasaac { get; set; }
         public int? IdUsuario { get; set; }
+        public DateTime UltimaActualizacion { get; set; }
+        public string Identificador { get; set; }
 
         public List<Categoria> Categorias { get; set; }
         public List<Tag> Tags { get; set; }

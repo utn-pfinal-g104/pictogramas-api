@@ -12,6 +12,7 @@ namespace PictogramasApi.Model.Mapping
             Map(x => x.Columnas).Column("Columnas");
             Map(x => x.Nombre).Column("Nombre");
             Map(x => x.UsuarioId).Column("UsuarioId").Key(KeyType.Assigned);
+            Map(x => x.UltimaActualizacion).Column("UltimaActualizacion");
         }
     }
 }
