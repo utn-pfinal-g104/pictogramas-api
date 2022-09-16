@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Carter.ModelBinding;
 using Carter.Request;
 using Carter.Response;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
+using PictogramasApi.Model.Requests;
 using PictogramasApi.Services;
 using PictogramasApi.Utils;
 using System;
@@ -53,6 +55,8 @@ namespace PictogramasApi.Modules
             DeletePictogramaDeUsuario();
             InsertFavorito();
             DeleteFavorito();
+            DeletePictogramaPropio();
+            CrearPictogramaPropio();
 
             #endregion "BD"
 
@@ -63,8 +67,56 @@ namespace PictogramasApi.Modules
             GetPictogramasPorNombreCategoria();
             GetPictogramasPorCategoriaId();
 
+            PostPictogramaPropio();
             DeletePictogramaDelStorage();
             #endregion "Storage"
+        }
+
+        private void PostPictogramaPropio()
+        {
+            Post("/{id:int}", async (ctx) =>
+            {
+                var id = ctx.Request.RouteValues.As<int>("id");
+                var request = await ctx.Request.Bind<Stream>();
+                await ctx.Response.Negotiate("");
+            });
+        }
+
+        private void CrearPictogramaPropio()
+        {
+            Post("/", async (ctx) =>
+            {
+                var request = await ctx.Request.Bind<PictogramaRequest>();
+                var pictograma = new Pictograma
+                {
+                    Identificador = request.Identificador,
+                    Aac = request.Aac,
+                    AacColor = request.AacColor,
+                    Categorias = request.CategoriasFiltradas,
+                    Hair = request.Hair,
+                    IdArasaac = null,
+                    IdUsuario = request.IdUsuario,
+                    Keywords = new List<PalabraClave> { new PalabraClave{ Keyword = request.Keyword} },
+                    Schematic = request.Schematic,
+                    Sex = request.Sex,
+                    Skin = request.Skin,
+                    UltimaActualizacion = DateTime.Now,
+                    Violence = request.Violence,
+                };
+                await _pictogramaMgmt.AgregarPictograma(pictograma);
+                await _palabraClaveMgmt.AgregarPalabraClave(pictograma, request.Keyword);
+                await ctx.Response.Negotiate(pictograma);
+            });
+        }
+
+        private void DeletePictogramaPropio()
+        {
+            Delete("/propios/{usuario:int}/{identificador:minlength(1)}", async (ctx) =>
+            {
+                var usuario = ctx.Request.RouteValues.As<int>("usuario");
+                var identificador = ctx.Request.RouteValues.As<string>("identificador");
+                await ctx.Response.Negotiate("");
+            });
         }
 
         private void GetInformacionPictogramas()

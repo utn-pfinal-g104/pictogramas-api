@@ -14,7 +14,9 @@ namespace PictogramasApi.Model.Requests
         public string File { get; set; }
         public string FileName { get; set; }
         public string Keyword { get; set; }
-        public List<Categoria> CategoriasFiltradas {get; set;}
+        public List<Categoria> CategoriasFiltradas { get; set;}
+        public string Identificador { get; set; }
+        public int IdUsuario { get; set; } 
     }
 
 }
