@@ -74,10 +74,12 @@ namespace PictogramasApi.Modules
 
         private void PostPictogramaPropio()
         {
-            Post("/{id:int}", async (ctx) =>
+            Post("/imagen", async (ctx) =>
             {
+                var request = await ctx.Request.Bind<Pictograma>();
                 var id = ctx.Request.RouteValues.As<int>("id");
-                var request = await ctx.Request.Bind<Stream>();
+                var imagen = Parser.ConvertFromBase64(request.Imagen);
+                _storageMgmt.Guardar(imagen, id.ToString());
                 await ctx.Response.Negotiate("");
             });
         }
@@ -115,6 +117,11 @@ namespace PictogramasApi.Modules
             {
                 var usuario = ctx.Request.RouteValues.As<int>("usuario");
                 var identificador = ctx.Request.RouteValues.As<string>("identificador");
+
+                var pictograma = _pictogramaMgmt.ObtenerPictogramaPropio(usuario, identificador);
+                _palabraClaveMgmt.EliminarPalabraClave(pictograma.Id);
+                await _pictogramaMgmt.EliminarPictogramaDeUsuario(pictograma.Id);
+                _storageMgmt.Borrar(pictograma.Id.ToString());
                 await ctx.Response.Negotiate("");
             });
         }

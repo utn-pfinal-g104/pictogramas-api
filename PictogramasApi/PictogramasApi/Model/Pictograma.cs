@@ -20,6 +20,7 @@ namespace PictogramasApi.Model
         public int? IdUsuario { get; set; }
         public DateTime UltimaActualizacion { get; set; }
         public string Identificador { get; set; }
+        public string Imagen { get; set; }
 
         public List<Categoria> Categorias { get; set; }
         public List<Tag> Tags { get; set; }

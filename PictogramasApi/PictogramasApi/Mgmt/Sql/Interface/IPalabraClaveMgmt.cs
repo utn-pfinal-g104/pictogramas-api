@@ -12,5 +12,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
         Task<PalabraClave> ObtenerKeyword(string palabra);
         Task AgregarPalabraClave(Pictograma pictograma, string keyword);
         Task EliminarPalabrasClaves();
+        void EliminarPalabraClave(int palabraId);
     }
 }

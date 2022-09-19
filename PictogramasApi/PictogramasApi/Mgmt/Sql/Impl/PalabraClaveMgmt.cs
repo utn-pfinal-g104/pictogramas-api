@@ -70,6 +70,11 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
+        public void EliminarPalabraClave(int palabraId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task EliminarPalabrasClaves()
         {
             try

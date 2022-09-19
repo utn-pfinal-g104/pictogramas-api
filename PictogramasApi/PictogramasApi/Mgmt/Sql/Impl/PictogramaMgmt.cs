@@ -315,5 +315,10 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw;
             }
         }
+
+        public Pictograma ObtenerPictogramaPropio(int usuario, string identificador)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
