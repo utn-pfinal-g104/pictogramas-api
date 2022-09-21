@@ -318,7 +318,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
 
         public Pictograma ObtenerPictogramaPropio(int usuario, string identificador)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.IdUsuario, Operator.Eq, usuario));
+                    pgAnd.Predicates.Add(Predicates.Field<Pictograma>(c => c.Identificador, Operator.Eq, identificador));
+                    var pictograma = (connection.GetList<Pictograma>(pgAnd)).FirstOrDefault();
+                    connection.Close();
+                    return pictograma;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }

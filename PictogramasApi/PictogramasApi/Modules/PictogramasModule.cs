@@ -80,7 +80,7 @@ namespace PictogramasApi.Modules
                 var id = ctx.Request.RouteValues.As<int>("id");
                 var imagen = Parser.ConvertFromBase64(request.Imagen);
                 _storageMgmt.Guardar(imagen, id.ToString());
-                await ctx.Response.Negotiate("");
+                await ctx.Response.Negotiate("Creado");
             });
         }
 
@@ -119,9 +119,12 @@ namespace PictogramasApi.Modules
                 var identificador = ctx.Request.RouteValues.As<string>("identificador");
 
                 var pictograma = _pictogramaMgmt.ObtenerPictogramaPropio(usuario, identificador);
-                _palabraClaveMgmt.EliminarPalabraClave(pictograma.Id);
-                await _pictogramaMgmt.EliminarPictogramaDeUsuario(pictograma.Id);
-                _storageMgmt.Borrar(pictograma.Id.ToString());
+                if (pictograma != null)
+                {
+                    _palabraClaveMgmt.EliminarPalabraClave(pictograma.Id);
+                    await _pictogramaMgmt.EliminarPictogramaDeUsuario(pictograma.Id);
+                    _storageMgmt.Borrar(pictograma.Id.ToString());
+                }
                 await ctx.Response.Negotiate("");
             });
         }

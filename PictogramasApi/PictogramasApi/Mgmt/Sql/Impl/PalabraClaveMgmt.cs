@@ -70,9 +70,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             };
         }
 
-        public void EliminarPalabraClave(int palabraId)
+        public void EliminarPalabraClave(int pictogramaId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<PalabraClave>(c => c.IdPictograma, Operator.Eq, pictogramaId));
+                    var cantidadPictogramas = (connection.Delete<Pictograma>(pgAnd));
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task EliminarPalabrasClaves()
