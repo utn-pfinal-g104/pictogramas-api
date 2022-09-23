@@ -56,7 +56,6 @@ namespace PictogramasApi.Modules
             InsertFavorito();
             DeleteFavorito();
             DeletePictogramaPropio();
-            CrearPictogramaPropio();
 
             #endregion "BD"
 
@@ -81,33 +80,6 @@ namespace PictogramasApi.Modules
                 var imagen = Parser.ConvertFromBase64(request.Imagen);
                 _storageMgmt.Guardar(imagen, id.ToString());
                 await ctx.Response.Negotiate("Creado");
-            });
-        }
-
-        private void CrearPictogramaPropio()
-        {
-            Post("/", async (ctx) =>
-            {
-                var request = await ctx.Request.Bind<PictogramaRequest>();
-                var pictograma = new Pictograma
-                {
-                    Identificador = request.Identificador,
-                    Aac = request.Aac,
-                    AacColor = request.AacColor,
-                    Categorias = request.CategoriasFiltradas,
-                    Hair = request.Hair,
-                    IdArasaac = null,
-                    IdUsuario = request.IdUsuario,
-                    Keywords = new List<PalabraClave> { new PalabraClave{ Keyword = request.Keyword} },
-                    Schematic = request.Schematic,
-                    Sex = request.Sex,
-                    Skin = request.Skin,
-                    UltimaActualizacion = DateTime.Now,
-                    Violence = request.Violence,
-                };
-                await _pictogramaMgmt.AgregarPictograma(pictograma);
-                await _palabraClaveMgmt.AgregarPalabraClave(pictograma, request.Keyword);
-                await ctx.Response.Negotiate(pictograma);
             });
         }
 

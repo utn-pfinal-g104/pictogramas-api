@@ -115,26 +115,5 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw ex;
             }
         }
-
-        public Usuario GetUsuarioPorIdentificador(string identificador)
-        {
-            try
-            {
-                using (IDbConnection connection = _context.CreateConnection())
-                {
-                    connection.Open();
-                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
-
-                    pgAnd.Predicates.Add(Predicates.Field<Usuario>(u => u.Identificador, Operator.Eq, identificador));
-                    Usuario usuario = (connection.GetList<Usuario>(pgAnd)).FirstOrDefault();
-                    connection.Close();
-                    return usuario;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
     }
 }

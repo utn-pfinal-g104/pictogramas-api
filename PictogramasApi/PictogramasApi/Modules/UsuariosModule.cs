@@ -37,7 +37,6 @@ namespace PictogramasApi.Modules
             PostUsuario();
             PatchUsuario();
             PostPictogramaDeUsuario();
-            GetUsuarioPorIdentificador();
         }
 
         private void PostPictogramaDeUsuario()
@@ -62,8 +61,8 @@ namespace PictogramasApi.Modules
                         Identificador = idUsuario.ToString() + "_" + request.FileName
                     };
                     pictograma = await _pictogramaMgmt.AgregarPictograma(pictograma);
-                    await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.CategoriasFiltradas);
-                    await _palabraClaveMgmt.AgregarPalabraClave(pictograma, request.Keyword);
+                    await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.Categorias);
+                    await _palabraClaveMgmt.AgregarPalabraClave(pictograma, request.Keywords[0].Keyword);
                     var imagenEnBase64 = request.File.Substring(request.File.LastIndexOf(',') + 1);
                     _storageMgmt.Guardar(Parser.ConvertFromBase64(imagenEnBase64), pictograma.Id.ToString());
                     await ctx.Response.Negotiate("Se creo el pictograma");
@@ -100,24 +99,6 @@ namespace PictogramasApi.Modules
                     ctx.Response.StatusCode = 404;
                     await ctx.Response.AsJson(ex.Message);
                 }                
-            });
-        }
-
-        private void GetUsuarioPorIdentificador()
-        {
-            Get("/identificador/{identificador:minlength(1)}", async (ctx) =>
-            {
-                var identificador = ctx.Request.RouteValues.As<string>("identificador");
-                try
-                {
-                    Usuario usuario = _usuarioMgmt.GetUsuarioPorIdentificador(identificador);
-                    await ctx.Response.Negotiate(usuario);
-                }
-                catch (Exception ex)
-                {
-                    ctx.Response.StatusCode = 404;
-                    await ctx.Response.AsJson(ex.Message);
-                }
             });
         }
 
@@ -158,7 +139,7 @@ namespace PictogramasApi.Modules
                 Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, password);
                 if (usuario == null)
                 {
-                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { Identificador = usuarioRequest.Identificador, NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel = 0, UltimaActualizacion = DateTime.Now });
+                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel = 0, UltimaActualizacion = DateTime.Now });
                 }
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson(usuario);

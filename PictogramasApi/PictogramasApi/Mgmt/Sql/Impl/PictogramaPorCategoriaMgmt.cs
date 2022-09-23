@@ -56,6 +56,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
+                    if (categorias == null) return;
                     foreach (var categoria in categorias)
                         connection.Insert(new PictogramaPorCategoria { IdCategoria = categoria.Id, IdPictograma = pictograma.Id });
                     connection.Close();
