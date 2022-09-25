@@ -35,7 +35,8 @@ namespace PictogramasApi.Modules
             GetUsuarioPorId();
             GetUsuarioPorUsernameYPassword();
             PostUsuario();
-            PatchUsuario();
+            PatchUsuarioPassword();
+            PutUsuario();
             PostPictogramaDeUsuario();
         }
 
@@ -148,13 +149,25 @@ namespace PictogramasApi.Modules
 
 
 
-        private void PatchUsuario()
+        private void PatchUsuarioPassword()
         {
             Patch("/", async (ctx) =>
             {
                 var usuario = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
                 usuario.Password = Seguridad.sha256_hash(usuario.Password);
+                usuario.UltimaActualizacion = DateTime.Now;
+                await _usuarioMgmt.ActualizarUsuario(usuario);
+                ctx.Response.StatusCode = 201;
+                await ctx.Response.AsJson("Usuario creado");
+            });
+        }
+
+        private void PutUsuario()
+        {
+            Put("/", async (ctx) =>
+            {
+                var usuario = await ctx.Request.Bind<Usuario>();
                 usuario.UltimaActualizacion = DateTime.Now;
                 await _usuarioMgmt.ActualizarUsuario(usuario);
                 ctx.Response.StatusCode = 201;
