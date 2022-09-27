@@ -268,6 +268,25 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
+        public async Task<List<FavoritoPorUsuario>> ObtenerFavoritos(int idUsuario)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<FavoritoPorUsuario>(c => c.IdUsuario, Operator.Eq, idUsuario));                    
+                    var favoritos = (connection.GetList<FavoritoPorUsuario>(pgAnd).ToList());
+                    connection.Close();
+                    return favoritos;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         public async Task AgregarFavorito(int idUsuario, int idPictograma)
         {
             string insert = $"insert into FavoritosPorUsuarios (UsuarioId, PictogramaId) values ({idUsuario}, {idPictograma})";

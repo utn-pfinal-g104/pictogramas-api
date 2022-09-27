@@ -47,7 +47,7 @@ namespace PictogramasApi.Jobs
         {
             // Se comenta y descomenta lo que se desea utilizar
             // Dejo esto hasta que el metodo este finalizado
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 

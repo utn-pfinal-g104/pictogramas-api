@@ -53,6 +53,7 @@ namespace PictogramasApi.Modules
             GetTotalPictogramas();
             GetInformacionPictogramas();
             DeletePictogramaDeUsuario();
+            GetFavoritos();
             InsertFavorito();
             DeleteFavorito();
             DeletePictogramaPropio();
@@ -300,6 +301,25 @@ namespace PictogramasApi.Modules
                 await _pictogramaMgmt.EliminarPictogramaDeUsuario(idPictogramaUsuario);
                 await ctx.Response.Negotiate("Pictograma eliminado de la base de datos");
             });            
+        }
+
+        private void GetFavoritos()
+        {
+            Get("/favoritos/{idUsuario:minlength(1)}/", async (ctx) =>
+            {
+                var idUsuario = ctx.Request.RouteValues.As<int>("idUsuario");
+
+                var favoritos = await _pictogramaMgmt.ObtenerFavoritos(idUsuario);
+                
+                if (favoritos != null)
+                {
+                    await ctx.Response.Negotiate(favoritos);
+                } 
+                else
+                {
+                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+                }
+            });
         }
 
         private void InsertFavorito()
