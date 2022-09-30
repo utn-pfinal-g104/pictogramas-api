@@ -74,12 +74,20 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         {
             try
             {
+                //using (IDbConnection connection = _context.CreateConnection())
+                //{
+                //    connection.Open();
+                //    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
+                //    pgAnd.Predicates.Add(Predicates.Field<PalabraClave>(c => c.IdPictograma, Operator.Eq, pictogramaId));
+                //    var cantidadPictogramas = (connection.Delete<Pictograma>(pgAnd));
+                //    connection.Close();
+                //}
+
+                string delete = $"delete from keywords where idpictograma = {pictogramaId} ";
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var pgAnd = new PredicateGroup { Operator = GroupOperator.Or, Predicates = new List<IPredicate>() };
-                    pgAnd.Predicates.Add(Predicates.Field<PalabraClave>(c => c.IdPictograma, Operator.Eq, pictogramaId));
-                    var cantidadPictogramas = (connection.Delete<Pictograma>(pgAnd));
+                    connection.Execute(delete);
                     connection.Close();
                 }
             }

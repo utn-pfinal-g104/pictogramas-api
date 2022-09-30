@@ -59,7 +59,7 @@ namespace PictogramasApi.Modules
                         Skin = request.Skin,
                         Violence = request.Violence,
                         UltimaActualizacion = DateTime.Now,
-                        Identificador = idUsuario.ToString() + "_" + request.FileName
+                        Identificador = request.Identificador
                     };
                     pictograma = await _pictogramaMgmt.AgregarPictograma(pictograma);
                     await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pictograma, request.Categorias);

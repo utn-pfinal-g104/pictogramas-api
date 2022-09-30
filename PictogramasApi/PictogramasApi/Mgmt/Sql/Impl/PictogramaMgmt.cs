@@ -252,9 +252,9 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 {
                     connection.Open();
                     StringBuilder query = new StringBuilder();
-                    var pictogramasQuery = $"delete from pictogramas where Idusuario = {pictogramaDeUsuarioId} "; //TODO verificar que sucede si mandan sin id y queda null, matchean todos los de arasaac? otra: hay que borrarlo de las otras tablas
-                    var favoritosPorUsuariosQuery = $"delete from pictogramasPorUsuarios pictogramaId = {pictogramaDeUsuarioId} ";
-                    var pictogramasPorCategoriasQuery = $"delete from pictogramas where IdPictograma = {pictogramaDeUsuarioId} ";
+                    var pictogramasQuery = $"delete from pictogramasPorCategorias where IdPictograma = {pictogramaDeUsuarioId} ";
+                    var favoritosPorUsuariosQuery = $"delete from FavoritosPorUsuarios where pictogramaId = {pictogramaDeUsuarioId} ";
+                    var pictogramasPorCategoriasQuery = $"delete from pictogramas where id = {pictogramaDeUsuarioId} ";
                     query.Append(pictogramasQuery);
                     query.Append(favoritosPorUsuariosQuery);
                     query.Append(pictogramasPorCategoriasQuery);
