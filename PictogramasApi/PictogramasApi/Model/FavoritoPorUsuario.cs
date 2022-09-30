@@ -7,7 +7,7 @@ namespace PictogramasApi.Model
 {
     public class FavoritoPorUsuario
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public int IdUsuario { get; set; }
         public int IdPictograma { get; set; }
     }

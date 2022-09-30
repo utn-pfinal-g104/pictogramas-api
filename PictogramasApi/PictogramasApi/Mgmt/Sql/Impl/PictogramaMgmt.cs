@@ -289,12 +289,13 @@ namespace PictogramasApi.Mgmt.Sql.Impl
         }
         public async Task AgregarFavorito(int idUsuario, int idPictograma)
         {
-            string insert = $"insert into FavoritosPorUsuarios (UsuarioId, PictogramaId) values ({idUsuario}, {idPictograma})";
+            string insert = $"insert into FavoritosPorUsuarios (Id, UsuarioId, PictogramaId) values ('{idUsuario}_{idPictograma}', {idUsuario}, {idPictograma})";
 
             var fpu = new FavoritoPorUsuario()
             {
                 IdUsuario = idUsuario,
-                IdPictograma = idPictograma
+                IdPictograma = idPictograma,
+                Id = idUsuario.ToString() + "_" + idPictograma.ToString()
             };
 
             try
@@ -302,8 +303,8 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    //await Task.Run(() => connection.Execute(insert));
-                    await Task.Run(() => connection.Insert(fpu));
+                    await Task.Run(() => connection.Execute(insert));
+                    //await Task.Run(() => connection.Insert(fpu));
 
                     connection.Close();
                 }
