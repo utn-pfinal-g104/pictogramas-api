@@ -96,7 +96,9 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    foreach(var celda in pizarra.Celdas)
+                    var celdasQuery = $"delete from CeldaPizarra where pizarraid = {pizarra.Id} ";
+                    connection.Execute(celdasQuery);
+                    foreach (var celda in pizarra.Celdas)
                     {
                         celda.PizarraId = pizarra.Id;
                         celda.UsuarioId = pizarra.UsuarioId;
@@ -137,10 +139,10 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 {
                     connection.Open();
                     StringBuilder query = new StringBuilder();
-                    var pizarrasQuery = $"delete from CeldaPizarra where pizarraid = {pizarraId} ";
-                    var celdasQuery = $"delete from pizarras where id = {pizarraId} ";
-                    query.Append(pizarrasQuery);
+                    var celdasQuery = $"delete from CeldaPizarra where pizarraid = {pizarraId} ";
+                    var pizarrasQuery = $"delete from pizarras where id = {pizarraId} ";
                     query.Append(celdasQuery);
+                    query.Append(pizarrasQuery);
                     connection.Execute(query.ToString());
                     connection.Close();
                 }
