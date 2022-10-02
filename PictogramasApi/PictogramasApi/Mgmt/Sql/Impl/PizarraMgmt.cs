@@ -1,4 +1,5 @@
-﻿using DapperExtensions;
+﻿using Dapper;
+using DapperExtensions;
 using PictogramasApi.Configuration;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 
 namespace PictogramasApi.Mgmt.Sql.Impl
 {
@@ -134,7 +136,12 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    connection.Delete<Pizarra>(pizarraId);
+                    StringBuilder query = new StringBuilder();
+                    var pizarrasQuery = $"delete from CeldaPizarra where pizarraid = {pizarraId} ";
+                    var celdasQuery = $"delete from pizarras where id = {pizarraId} ";
+                    query.Append(pizarrasQuery);
+                    query.Append(celdasQuery);
+                    connection.Execute(query.ToString());
                     connection.Close();
                 }
             }
