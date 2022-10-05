@@ -10,6 +10,7 @@ namespace PictogramasApi.Mgmt.CMS
         private readonly string _connectionString;
         private readonly BlobContainerClient container;
         private readonly BlobContainerClient categoriasContainer;
+        private readonly BlobContainerClient usuariosContainer;
 
         public StorageMgmt(IConfiguration configuration)
         {
@@ -17,6 +18,7 @@ namespace PictogramasApi.Mgmt.CMS
             _connectionString = _configuration.GetValue<string>("Storage:ConnectionString");
             container = new BlobContainerClient(_connectionString, _configuration.GetValue<string>("Storage:Container"));
             categoriasContainer = new BlobContainerClient(_connectionString, "categorias");
+            usuariosContainer = new BlobContainerClient(_connectionString, "usuarios");
         }
 
         public void Guardar(Stream file, string fileName)
@@ -33,6 +35,13 @@ namespace PictogramasApi.Mgmt.CMS
             var fileUrl = blob.Uri.AbsoluteUri;
         }
 
+        public void GuardarImagenUsuario(Stream file, string fileName)
+        {
+            BlobClient blob = usuariosContainer.GetBlobClient(fileName);
+            blob.Upload(file);
+            var fileUrl = blob.Uri.AbsoluteUri;
+        }
+
         public Stream Obtener(string filename)
         {
             BlobClient blob = container.GetBlobClient(filename);
@@ -43,6 +52,13 @@ namespace PictogramasApi.Mgmt.CMS
         public Stream ObtenerImagenCategoria(string filename)
         {
             BlobClient blob = categoriasContainer.GetBlobClient(filename);
+            var stream = blob.OpenRead();
+            return stream;
+        }
+
+        public Stream ObtenerImagenUsuario(string filename)
+        {
+            BlobClient blob = usuariosContainer.GetBlobClient(filename);
             var stream = blob.OpenRead();
             return stream;
         }

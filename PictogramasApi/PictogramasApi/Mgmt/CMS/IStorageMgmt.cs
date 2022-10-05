@@ -9,5 +9,7 @@ namespace PictogramasApi.Mgmt.CMS
         void Borrar(string filename);
         void GuardarImagenCategoria(Stream file, string fileName);
         Stream ObtenerImagenCategoria(string filename);
+        void GuardarImagenUsuario(Stream file, string fileName);
+        Stream ObtenerImagenUsuario(string filename);
     }
 }

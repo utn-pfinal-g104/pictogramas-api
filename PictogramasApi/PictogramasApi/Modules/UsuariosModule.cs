@@ -113,6 +113,14 @@ namespace PictogramasApi.Modules
                 {
                     password = Seguridad.sha256_hash(password);
                     Usuario usuario = await _usuarioMgmt.GetUsuario(username, password);
+                    try
+                    {
+                        usuario.Imagen = Parser.ConvertToBase64(_storageMgmt.ObtenerImagenUsuario(usuario.Id.ToString()));
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
                     await ctx.Response.Negotiate(usuario);
                 }
                 catch (Exception ex)
@@ -170,6 +178,18 @@ namespace PictogramasApi.Modules
                 var usuario = await ctx.Request.Bind<Usuario>();
                 usuario.UltimaActualizacion = DateTime.Now;
                 await _usuarioMgmt.ActualizarUsuario(usuario);
+                try
+                {
+                    if (usuario.Imagen != "" && usuario.Imagen != null)
+                    {
+                        var imagen = Parser.ConvertFromBase64(usuario.Imagen);
+                        _storageMgmt.Guardar(imagen, usuario.Id.ToString());
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson("Usuario creado");
             });
