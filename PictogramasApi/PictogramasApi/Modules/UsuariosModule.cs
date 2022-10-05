@@ -93,6 +93,14 @@ namespace PictogramasApi.Modules
                 try
                 {                    
                     Usuario usuario = await _usuarioMgmt.GetUsuario(id);
+                    try
+                    {
+                        usuario.Imagen = "data:image/png;base64," + Parser.ConvertToBase64(_storageMgmt.ObtenerImagenUsuario(usuario.Id.ToString()));
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
                     await ctx.Response.Negotiate(usuario);
                 }
                 catch (Exception ex)
@@ -115,7 +123,7 @@ namespace PictogramasApi.Modules
                     Usuario usuario = await _usuarioMgmt.GetUsuario(username, password);
                     try
                     {
-                        usuario.Imagen = Parser.ConvertToBase64(_storageMgmt.ObtenerImagenUsuario(usuario.Id.ToString()));
+                        usuario.Imagen = "data:image/png;base64," + Parser.ConvertToBase64(_storageMgmt.ObtenerImagenUsuario(usuario.Id.ToString()));
                     }
                     catch(Exception ex)
                     {
@@ -178,12 +186,13 @@ namespace PictogramasApi.Modules
                 var usuario = await ctx.Request.Bind<Usuario>();
                 usuario.UltimaActualizacion = DateTime.Now;
                 await _usuarioMgmt.ActualizarUsuario(usuario);
-                try
+                try 
                 {
                     if (usuario.Imagen != "" && usuario.Imagen != null)
                     {
-                        var imagen = Parser.ConvertFromBase64(usuario.Imagen);
-                        _storageMgmt.Guardar(imagen, usuario.Id.ToString());
+                        var imagenEnBase64 = usuario.Imagen.Substring(usuario.Imagen.LastIndexOf(',') + 1);
+                        var imagen = Parser.ConvertFromBase64(imagenEnBase64);
+                        _storageMgmt.GuardarImagenUsuario(imagen, usuario.Id.ToString());
                     }
                 }
                 catch(Exception ex)
