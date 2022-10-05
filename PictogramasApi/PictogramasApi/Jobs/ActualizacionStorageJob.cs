@@ -5,6 +5,8 @@ using PictogramasApi.Services;
 using Quartz;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -51,10 +53,10 @@ namespace PictogramasApi.Jobs
 
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
 
-            List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
-            List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
-            List<Tag> tags = ObtenerTags(pictogramasArasaac);
-            List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
+            //List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
+            //List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
+            //List<Tag> tags = ObtenerTags(pictogramasArasaac);
+            //List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
 
             //// ELIMINAR REGISTROS ACTUALES
             //await _categoriaMgmt.EliminarCategorias();
@@ -83,7 +85,7 @@ namespace PictogramasApi.Jobs
             
 
             //// INSERT PICTOGRAMAS X CATEGORIAS
-            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
+            //await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
 
             //Guardar imagenes en Storage
             //List<Stream> pictogramasAsStreams = new List<Stream>();
@@ -101,6 +103,67 @@ namespace PictogramasApi.Jobs
             //{
             //    throw e;
             //}
+
+            // Generar imagenes de categorias
+            GenerarImagenesDeCategorias(categoriasNuestras, pictogramasNuestros, picsXcats);
+        }
+
+        private void GenerarImagenesDeCategorias(List<Categoria> categoriasNuestras, List<Pictograma> pictogramasNuestros, List<PictogramaPorCategoria> picsXcats)
+        {
+            foreach (var categoria in categoriasNuestras)
+            {
+                try
+                {
+                    var pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id).ToList();
+                    var pictograma1 = pictogramasDeCategoria[0] != null ? pictogramasDeCategoria[0].IdPictograma : 0;
+                    var pictograma2 = pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : 0;
+                    var pictograma3 = pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : 0;
+                    var pictograma4 = pictogramasDeCategoria[3] != null ? pictogramasDeCategoria[3].IdPictograma : 0;
+                    var imagen1 = _storageMgmt.Obtener(pictograma1.ToString());
+                    var imagen2 = _storageMgmt.Obtener(pictograma2.ToString());
+                    var imagen3 = _storageMgmt.Obtener(pictograma3.ToString());
+                    var imagen4 = _storageMgmt.Obtener(pictograma4.ToString());
+                    using (Image image1 = Image.FromStream(imagen1))
+                    {
+                        using (Image image2 = Image.FromStream(imagen2))
+                        {
+                            using (Image image3 = Image.FromStream(imagen3))
+                            {
+                                using (Image image4 = Image.FromStream(imagen4))
+                                {
+                                    using (Bitmap bmp = new Bitmap(
+                                        image1.Width + image2.Width >= image3.Width + image4.Width ?
+                                            image1.Width + image2.Width : image3.Width + image4.Width,
+                                        image1.Height + image3.Height >= image2.Height + image4.Height ?
+                                            image1.Height + image3.Height : image2.Height + image4.Height))
+                                    {
+                                        using (Graphics g = Graphics.FromImage(bmp))
+                                        {
+                                            using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 255, 255)))
+                                            {
+                                                g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height);
+                                            }
+                                            g.DrawImage(image1, 0, 0, image1.Width, image1.Height);
+                                            g.DrawImage(image2, image1.Width, 0, image1.Width + image2.Width, image2.Height);
+                                            g.DrawImage(image3, 0, image1.Height, image3.Width, image1.Height + image3.Height);
+                                            g.DrawImage(image4, image3.Width, image2.Height, image4.Width, image2.Height + image4.Height);
+
+                                            var stream = new System.IO.MemoryStream();
+                                            bmp.Save(stream, ImageFormat.Jpeg);
+                                            stream.Position = 0;
+                                            _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                { 
+                }
+            }
         }
 
         // Tambien agrega tags como categorias
