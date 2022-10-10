@@ -105,7 +105,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[CategoriasPorUsuarios](
-	[Id] [int] NOT NULL,
+	[Id] varchar(30) NOT NULL,
 	[UsuarioId] [int] NULL,
 	[CategoriaId] [int] NULL,
 PRIMARY KEY CLUSTERED 
