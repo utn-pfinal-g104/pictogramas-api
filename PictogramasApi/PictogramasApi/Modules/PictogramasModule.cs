@@ -317,7 +317,7 @@ namespace PictogramasApi.Modules
                 } 
                 else
                 {
-                    await ctx.Response.Negotiate("Error obteniendo el pictograma");
+                    await ctx.Response.Negotiate("Error obteniendo los pictogramas favoritos");
                 }
             });
         }

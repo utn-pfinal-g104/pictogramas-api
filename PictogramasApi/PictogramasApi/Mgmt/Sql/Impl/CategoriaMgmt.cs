@@ -133,5 +133,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw ex;
             }
         }
+
+        
     }
 }

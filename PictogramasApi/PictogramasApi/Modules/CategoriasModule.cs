@@ -10,16 +10,21 @@ namespace PictogramasApi.Modules
     public class CategoriasModule : CarterModule
     {
         private readonly ICategoriaMgmt _categoriaMgmt;
+        private readonly ICategoriaPorUsuarioMgmt _categoriaPorUsuarioMgmt;
         private readonly IStorageMgmt _storageMgmt;
 
-        public CategoriasModule(ICategoriaMgmt categoriaMgmt, IStorageMgmt storageMgmt) : base("/categorias")
+        public CategoriasModule(ICategoriaMgmt categoriaMgmt, ICategoriaPorUsuarioMgmt categoriaPorUsuarioMgmt, IStorageMgmt storageMgmt) : base("/categorias")
         {
             _categoriaMgmt = categoriaMgmt;
+            _categoriaPorUsuarioMgmt = categoriaPorUsuarioMgmt;
             _storageMgmt = storageMgmt;
 
             GetCategorias();
             GetTotalCategorias();
             GetCategoriaaDelStorageAsBase64();
+            GetCategoriasDeUsuario();
+            DeleteCategoriasDeUsuario();
+            InsertarCategoriasDeUsuario();
         }
 
         private void GetCategorias()
@@ -58,6 +63,41 @@ namespace PictogramasApi.Modules
                     ctx.Response.StatusCode = 404;
                     await ctx.Response.Negotiate("No existe el pictograma");
                 }
+            });
+        }
+
+        private void GetCategoriasDeUsuario()
+        {
+            Get("/categoriasDeUsuario/{idUsuario:minlength(1)}", async (ctx) =>
+            {
+                var idUsuario = ctx.Request.RouteValues.As<int>("idUsuario");
+
+                var categorias = _categoriaPorUsuarioMgmt.ObtenerCategoriasDeUsuario(idUsuario);
+
+                if (categorias != null)
+                {
+                    await ctx.Response.Negotiate(categorias);
+                }
+                else
+                {
+                    await ctx.Response.Negotiate("Error obteniendo categorias favoritas");
+                }
+            });
+        }
+
+        private void DeleteCategoriasDeUsuario()
+        {
+            Delete("", async (ctx) =>
+            {
+                //TODO
+            });
+        }
+
+        private void InsertarCategoriasDeUsuario()
+        {
+            Post("", async (ctx) =>
+            {
+                //TODO
             });
         }
     }

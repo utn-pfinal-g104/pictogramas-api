@@ -7,7 +7,7 @@ namespace PictogramasApi.Model
 {
     public class CategoriaPorUsuario
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public int UsuarioId { get; set; }
         public int CategoriaId { get; set; }
     }

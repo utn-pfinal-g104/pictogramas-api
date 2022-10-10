@@ -75,17 +75,17 @@ namespace PictogramasApi.Jobs
             //foreach (var keyword in palabrasClaves)
             //    keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;
 
-            //// INSERT KEYWORDS
+            // INSERT KEYWORDS
             //await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
 
             // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
             List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
             // Tambien agrega tags como categorias
             List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
-            
+
 
             //// INSERT PICTOGRAMAS X CATEGORIAS
-            //await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
+            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
 
             //Guardar imagenes en Storage
             //List<Stream> pictogramasAsStreams = new List<Stream>();
