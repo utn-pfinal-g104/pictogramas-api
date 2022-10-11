@@ -21,7 +21,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             _context = context;
         }
 
-        public async Task<List<CategoriaPorUsuario>> ObtenerCategoriasDeUsuario(int idUsuario)
+        public async Task<List<CategoriaPorUsuario>> ObtenerCategoriasPorUsuario(int idUsuario)
         {
             try
             {
@@ -41,14 +41,14 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task EliminarCategoriasDeUsuario(int idUsuario)
+        public async Task EliminarCategoriaPorUsuario(int idUsuario, int idCategoria)
         {
             try
             {
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    var query = $"delete from CategoriasPorUsuarios where UsuarioId = {idUsuario}";
+                    var query = $"delete from CategoriasPorUsuarios where UsuarioId = {idUsuario} and CategoriaId = {idCategoria};";
                     await Task.Run(() => connection.Execute(query));
                     connection.Close();
                 }
@@ -60,7 +60,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
-        public async Task InsertarCategoriasDeUsuario(int idUsuario, List<int> idsCategorias)
+        public async Task InsertarCategoriasPorUsuario(int idUsuario, List<int> idsCategorias)
         {
             StringBuilder sb = new StringBuilder("");
 
@@ -75,6 +75,26 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 {
                     connection.Open();
                     await Task.Run(() => connection.Execute(sb.ToString())); //TODO chequear si algun insert falla, ¿que pasa?
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public async Task InsertarCategoriaPorUsuario(int idUsuario, int idCategoria)
+        {
+            try
+            {
+                string insert = $"insert into CategoriasPorUsuarios (Id, UsuarioId, CategoriaId) values ('{idUsuario}_{idCategoria}', {idUsuario}, {idCategoria});";
+                
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    await Task.Run(() => connection.Execute(insert));
 
                     connection.Close();
                 }

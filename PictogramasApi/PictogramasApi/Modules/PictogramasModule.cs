@@ -342,7 +342,7 @@ namespace PictogramasApi.Modules
                 var idUsuario = ctx.Request.RouteValues.As<int>("idUsuario");
 
                 await _pictogramaMgmt.EliminarFavorito(idUsuario, idPictograma);
-                await ctx.Response.Negotiate("favorito guardado");
+                await ctx.Response.Negotiate("favorito eliminado");
             });
         }
     }

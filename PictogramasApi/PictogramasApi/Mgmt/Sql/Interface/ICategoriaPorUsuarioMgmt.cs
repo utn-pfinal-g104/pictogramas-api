@@ -8,8 +8,10 @@ namespace PictogramasApi.Mgmt.Sql.Interface
 {
     public interface ICategoriaPorUsuarioMgmt
     {
-        Task<List<CategoriaPorUsuario>> ObtenerCategoriasDeUsuario(int idUsuario);
-        Task EliminarCategoriasDeUsuario(int idUsuario);
-        Task InsertarCategoriasDeUsuario(int idUsuario, List<int> idCategoria); 
+        Task<List<CategoriaPorUsuario>> ObtenerCategoriasPorUsuario(int idUsuario);
+        Task EliminarCategoriaPorUsuario(int idUsuario, int idCategoria);
+        Task InsertarCategoriasPorUsuario(int idUsuario, List<int> idCategoria);
+        Task InsertarCategoriaPorUsuario(int idUsuario, int idCategoria);
+
     }
 }
