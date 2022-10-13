@@ -149,6 +149,8 @@ CREATE TABLE [dbo].[Pictogramas](
 	[Hair] [bit] NOT NULL,
 	[IdArasaac] [int] NULL,
 	[IdUsuario] [int] NULL,
+	[Identificador] [varchar](30) NULL,
+	[UltimaActualizacion] [datetime] NULL,
  CONSTRAINT [PK_Pictogramas] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
