@@ -58,7 +58,7 @@ namespace PictogramasApi
             services.AddSingleton<IUsuarioMgmt, UsuarioaMgmt>();
             services.AddSingleton<IPizarraMgmt, PizarraMgmt>();
             services.AddSingleton<ICategoriaPorUsuarioMgmt, CategoriaPorUsuarioMgmt>();
-
+            services.AddSingleton<IEstadisticaMgmt, EstadisticaMgmt>();
 
             services.AddSingleton<ArasaacService>();
             services.AddSingleton<GoogleTranslateService>();
