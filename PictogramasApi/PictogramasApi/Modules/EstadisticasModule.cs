@@ -7,6 +7,7 @@ using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
 using PictogramasApi.Model.Requests;
 using System;
+using System.Collections.Generic;
 
 namespace PictogramasApi.Modules
 {
@@ -46,17 +47,43 @@ namespace PictogramasApi.Modules
             {
                 var estadisticaRequest = await ctx.Request.Bind<EstadisticaRequest>();
 
-                // TODO: Debo reccorer e insertar cada uno de los pictogramas anteriores
-                var estadistica = new Estadistica
-                {
-                    Fecha = estadisticaRequest.Fecha,
-                    Identificacion = estadisticaRequest.Id,
-                    Pictograma = estadisticaRequest.Pictograma.Id,
-                    PictogramaPrevio = estadisticaRequest.Previo?.Id,
-                    Usuario = estadisticaRequest.Usuario
-                };
+                var estadisticas = new List<Estadistica>();
 
-                _estadisticaMgmt.InsertarEstadistica(estadistica);
+                if (estadisticaRequest.Previo == null)
+                {
+                    // Es una seleccion de un unico pictograma, solo tengo una estadistica para guardar
+                    var estadistica = new Estadistica
+                    {
+                        Fecha = estadisticaRequest.Fecha,
+                        Identificacion = estadisticaRequest.Id,
+                        Pictograma = estadisticaRequest.Pictograma.Id,
+                        PictogramaPrevio = null,
+                        Usuario = estadisticaRequest.Usuario
+                    };
+
+                    _estadisticaMgmt.InsertarEstadistica(estadistica);
+                }
+                else
+                {
+                    var pictogramasAnteriores = estadisticaRequest.TodosLosAnteriores;
+                    //Hay una lista de pictogramas para guardar
+                    //TODO: Finalizar guardado de anteriores
+                    for (int i = 0; i < pictogramasAnteriores.Count; i++)
+                    {
+                        // El primero de todos es el primer pictograma
+                    }
+
+                    //Luego de insertar los anteriores, inserto el ultimo
+                    var estadistica = new Estadistica
+                    {
+                        Fecha = estadisticaRequest.Fecha,
+                        Identificacion = estadisticaRequest.Id,
+                        Pictograma = estadisticaRequest.Pictograma.Id,
+                        PictogramaPrevio = estadisticaRequest.Previo.Id,
+                        Usuario = estadisticaRequest.Usuario
+                    };
+                    _estadisticaMgmt.InsertarEstadistica(estadistica);
+                }
 
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson("Creado");
