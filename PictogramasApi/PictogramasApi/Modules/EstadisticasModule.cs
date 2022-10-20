@@ -46,12 +46,13 @@ namespace PictogramasApi.Modules
             {
                 var estadisticaRequest = await ctx.Request.Bind<EstadisticaRequest>();
 
+                // TODO: Debo reccorer e insertar cada uno de los pictogramas anteriores
                 var estadistica = new Estadistica
                 {
                     Fecha = estadisticaRequest.Fecha,
                     Identificacion = estadisticaRequest.Id,
                     Pictograma = estadisticaRequest.Pictograma.Id,
-                    PictogramaPrevio = estadisticaRequest.Previo.Id,
+                    PictogramaPrevio = estadisticaRequest.Previo?.Id,
                     Usuario = estadisticaRequest.Usuario
                 };
 
