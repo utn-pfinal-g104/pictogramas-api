@@ -55,6 +55,7 @@ namespace PictogramasApi.Modules
                 {
                     var picsxcats = _picsPorCatMgmt.ObtenerCategoriasPorPictograma(registro.Pictograma);
                     var categorias = (await _categoriaMgmt.ObtenerCategorias()).Where(c => picsxcats.Any(pxc => pxc.IdCategoria == c.Id)).ToList();
+                    // TODO: Revisar, ideal que sean solo categorias hijas
                     categorias = categorias.Where(c => !categorias.Any(ch => ch.CategoriaPadre == c.Id)).ToList();
 
                     //Completo el diccionario de pictogramas, contabilizando cuantas veces se utilizo
