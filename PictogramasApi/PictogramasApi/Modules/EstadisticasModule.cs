@@ -83,10 +83,10 @@ namespace PictogramasApi.Modules
                 cantidadDeCategoriasDistintasUtilizadas = diccionarioCategorias.Count();
 
                 // Ordeno los diccionarios y saco los 5 elementos con mayor value (mas utilizados)
-                var categoriasMasUtilizadas = (from entry in diccionarioCategorias orderby entry.Value descending select entry.Key)
+                categoriasMasUtilizdas = (from entry in diccionarioCategorias orderby entry.Value descending select entry.Key)
                     .Take(5).ToList();
 
-                var pictogramasIdsMasUtilizados = (from entry in diccionarioPictogramas orderby entry.Value descending select entry.Key)
+                pictogramasMasUtilizados = (from entry in diccionarioPictogramas orderby entry.Value descending select entry.Key)
                     .Take(5).ToList();
 
                 var reporteEstadisticas = new EstadisticaResponse
@@ -99,7 +99,7 @@ namespace PictogramasApi.Modules
                 };
 
                 ctx.Response.StatusCode = 200;
-                await ctx.Response.AsJson(estadisticas);
+                await ctx.Response.AsJson(reporteEstadisticas);
             });
         }
 
