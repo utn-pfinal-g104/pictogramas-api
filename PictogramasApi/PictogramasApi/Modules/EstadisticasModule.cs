@@ -18,13 +18,15 @@ namespace PictogramasApi.Modules
         private readonly INeo4JMgmt _neo4JMgmt;
         private readonly IEstadisticaMgmt _estadisticaMgmt;
         private readonly IPictogramaPorCategoriaMgmt _picsPorCatMgmt;
+        private readonly ICategoriaMgmt _categoriaMgmt;
 
         public EstadisticasModule(INeo4JMgmt neo4JMgmt, IEstadisticaMgmt estadisticaMgmt,
-            IPictogramaPorCategoriaMgmt picsPorCatMgmt) : base("/estadisticas")
+            IPictogramaPorCategoriaMgmt picsPorCatMgmt, ICategoriaMgmt categoriaMgmt) : base("/estadisticas")
         {
             _neo4JMgmt = neo4JMgmt;
             _estadisticaMgmt = estadisticaMgmt;
             _picsPorCatMgmt = picsPorCatMgmt;
+            _categoriaMgmt = categoriaMgmt;
 
             // Esto quedo deprecadisimo
             GetRelaciones();
@@ -51,7 +53,9 @@ namespace PictogramasApi.Modules
 
                 foreach (var registro in estadisticas)
                 {
-                    var categorias = _picsPorCatMgmt.ObtenerCategoriasPorPictograma(registro.Pictograma);
+                    var picsxcats = _picsPorCatMgmt.ObtenerCategoriasPorPictograma(registro.Pictograma);
+                    var categorias = (await _categoriaMgmt.ObtenerCategorias()).Where(c => picsxcats.Any(pxc => pxc.IdCategoria == c.Id)).ToList();
+                    categorias = categorias.Where(c => !categorias.Any(ch => ch.CategoriaPadre == c.Id)).ToList();
 
                     //Completo el diccionario de pictogramas, contabilizando cuantas veces se utilizo
                     if (diccionarioPictogramas.ContainsKey(registro.Pictograma))
@@ -67,14 +71,14 @@ namespace PictogramasApi.Modules
                     foreach (var categoria in categorias)
                     {
                         // Completo el diccionario con la categoria aumentando las veces que se utilizo, con esto puedo sacar cantidad total y mas utilizadas
-                        if (diccionarioCategorias.ContainsKey(categoria.IdCategoria))
+                        if (diccionarioCategorias.ContainsKey(categoria.Id))
                         {
-                            var usoActual = diccionarioCategorias[categoria.IdCategoria];
-                            diccionarioCategorias[categoria.IdCategoria] = usoActual + 1;
+                            var usoActual = diccionarioCategorias[categoria.Id];
+                            diccionarioCategorias[categoria.Id] = usoActual + 1;
                         }
                         else
                         {
-                            diccionarioCategorias.Add(categoria.IdCategoria, 1);
+                            diccionarioCategorias.Add(categoria.Id, 1);
                         }
                     }
                 }
@@ -94,7 +98,7 @@ namespace PictogramasApi.Modules
                     TodasLasEstadisticas = estadisticas,
                     CantidadDeCategoriasDistintasUtilizadas = cantidadDeCategoriasDistintasUtilizadas,
                     CantidadDePictogramasDistintosUtilizados = cantidadDePictogramasDistintosUtilizados,
-                    CategoriasMasUtilizdas = categoriasMasUtilizdas,
+                    CategoriasMasUtilizadas = categoriasMasUtilizdas,
                     PictogramasMasUtilizados = pictogramasMasUtilizados
                 };
 

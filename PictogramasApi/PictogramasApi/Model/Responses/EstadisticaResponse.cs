@@ -6,7 +6,7 @@ namespace PictogramasApi.Model.Responses
     {
         public List<Estadistica> TodasLasEstadisticas { get; set; }
         public List<int> PictogramasMasUtilizados { get; set; }
-        public List<int> CategoriasMasUtilizdas { get; set; }
+        public List<int> CategoriasMasUtilizadas { get; set; }
         public int CantidadDePictogramasDistintosUtilizados { get; set; }
         public int CantidadDeCategoriasDistintasUtilizadas { get; set; }
     }
