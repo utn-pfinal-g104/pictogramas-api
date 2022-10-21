@@ -85,6 +85,26 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
         }
 
+        public List<PictogramaPorCategoria> ObtenerCategoriasPorPictograma(int pictograma)
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var pgAnd = new PredicateGroup { Operator = GroupOperator.And, Predicates = new List<IPredicate>() };
+                    pgAnd.Predicates.Add(Predicates.Field<PictogramaPorCategoria>(p => p.IdPictograma, Operator.Eq, pictograma));
+                    var picsXcat = (connection.GetList<PictogramaPorCategoria>(pgAnd)).ToList();
+                    connection.Close();
+                    return picsXcat;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         public async Task<List<PictogramaPorCategoria>> ObtenerPictogramasPorCategoria(int categoria)
         {
             try
