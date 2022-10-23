@@ -101,7 +101,8 @@ namespace PictogramasApi.Mgmt.Sql.Impl
             }
             catch (Exception ex)
             {
-                throw ex;
+                Console.WriteLine($"Categoria para usuario {idUsuario}_{idCategoria} ya configurada");
+                //throw ex;
             }
         }
     }
