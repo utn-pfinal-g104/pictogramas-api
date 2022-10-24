@@ -1,0 +1,73 @@
+# https://docs.docker.com/compose/production/
+# Read how to apply changes over this compose for other environments
+# by using multifile compose.
+version: "3.1"
+services:
+    pictogar-storage: 
+        image: "mcr.microsoft.com/azure-storage/azurite:3.20.1-amd64"
+        container_name: pictogar-storage
+        restart: unless-stopped
+        command: azurite -l /data --blobHost 0.0.0.0
+        ports: 
+            - "10000:10000"
+            - "10001:10001"
+            - "10002:10002"
+        networks:
+            - pictogar-inner-network
+        volumes:
+            - pictogar-storage-volume:/data
+    pictogar-database:
+        image: "mcr.microsoft.com/mssql/server:2019-CU11-ubuntu-20.04"
+        container_name: pictogar-database
+        restart: unless-stopped
+        environment:
+            - ACCEPT_EULA=true
+            - SA_PASSWORD=qweQWE123!@#
+        ports: 
+            - "1433:1433"
+        networks:
+            - pictogar-inner-network  
+        volumes:
+            - pictogar-database-volume:/data
+    pictogar-api:
+        image: "ghcr.io/utn-pfinal-g104/pictogar-api:latest"
+        container_name: pictogar-api
+        restart: unless-stopped
+        # env_file: 
+        #     - ./environments/dev/pictogar-api_dev.env
+        ports: 
+            - "5000:80"
+            - "5443:443"
+        networks:
+            - pictogar-inner-network
+            - pictogar-exposed-to-clients-network
+        volumes:
+            - pictogar-api-volume:/logs
+        depends_on: 
+            - pictogar-database
+            - pictogar-storage
+    pictogar-web:
+        image: "ghcr.io/utn-pfinal-g104/pictogar-web:latest"
+        container_name: pictogar-web
+        restart: unless-stopped
+        # env_file: 
+        #     - ./environments/dev/pictogar-web_dev.env
+        ports: 
+            - "3000:3000"
+        networks:
+            - pictogar-exposed-to-clients-network
+        volumes:
+            - pictogar-front-volume:/logs
+        depends_on: 
+            - pictogar-api 
+volumes: 
+    pictogar-storage-volume:
+    pictogar-database-volume: 
+    pictogar-api-volume: 
+    pictogar-front-volume:               
+networks:
+    pictogar-inner-network: 
+        driver: bridge
+    pictogar-exposed-to-clients-network: 
+        driver: bridge
+    
