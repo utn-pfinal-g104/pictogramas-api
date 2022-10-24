@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and push new image
         run: |
-          docker build -t ghcr.io/utn-pfinal-g104/pictogar-api:latest .
+          docker build -t ghcr.io/utn-pfinal-g104/pictogar-api:latest ../
           docker push ghcr.io/utn-pfinal-g104/pictogar-api:latest
   deploy-over-ssh:
     name: Deploy
