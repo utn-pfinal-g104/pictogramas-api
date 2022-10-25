@@ -63,7 +63,7 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 using (IDbConnection connection = _context.CreateConnection())
                 {
                     connection.Open();
-                    string query = $"select top {cantidad} * from estadisticas where Usuario = {usuario}";
+                    string query = $"select top {cantidad} * from estadisticas where Usuario = {usuario} order by fecha desc";
                     var estadisticas = connection.Query<Estadistica>(query).ToList();
                     connection.Close();
                     return estadisticas.ToList();
