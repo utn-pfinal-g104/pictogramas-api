@@ -32,8 +32,21 @@ namespace PictogramasApi.Modules
             GetRelaciones();
 
             GetEstadisticasPorUsuario();
+            GetPictogramasRecientes();
 
             PostEstadistica();
+        }
+
+        private void GetPictogramasRecientes()
+        {
+            Get("/recientes/{usuario:int}", async (ctx) =>
+            {
+                var usuario = ctx.Request.RouteValues.As<int>("usuario");
+                var hayCantidad = Int32.TryParse(ctx.Request.Query["cantidad"], out int cantidad);
+                var recientes = _estadisticaMgmt.ObtenerRecientes(hayCantidad ? cantidad: 10, usuario);
+                ctx.Response.StatusCode = 200;
+                await ctx.Response.AsJson(recientes);
+            });
         }
 
         private void GetEstadisticasPorUsuario()

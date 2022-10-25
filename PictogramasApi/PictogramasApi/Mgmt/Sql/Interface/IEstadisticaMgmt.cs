@@ -7,5 +7,6 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     {
         void InsertarEstadistica(Estadistica estadistica);
         List<Estadistica> ObtenerEstadisticasDeUsuario(int usuario);
+        List<Estadistica> ObtenerRecientes(int cantidad, int usuario);
     }
 }
