@@ -24,7 +24,7 @@ services:
             - ACCEPT_EULA=true
             - SA_PASSWORD=qweQWE123!@#
         ports: 
-            - "1433:1433"
+            - "1334:1433" #Changed so database do not get attacked
         networks:
             - pictogar-inner-network  
         volumes:
