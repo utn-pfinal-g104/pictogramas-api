@@ -149,8 +149,8 @@ CREATE TABLE [dbo].[Pictogramas](
 	[Hair] [bit] NOT NULL,
 	[IdArasaac] [int] NULL,
 	[IdUsuario] [int] NULL,
-	[Identificador] [varchar](30) NULL,
-	[UltimaActualizacion] datetime2 NULL,
+	[Identificador] [varchar](50) NULL,
+	[UltimaActualizacion] datetime NOT NULL,
  CONSTRAINT [PK_Pictogramas] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
@@ -189,7 +189,7 @@ CREATE TABLE [dbo].[Usuarios](
 	[Skin] [bit] NOT NULL,
 	[Hair] [bit] NOT NULL,
 	[Nivel] [int] NOT NULL,
-	[UltimaActualizacion] [datetime2] NULL,
+	[UltimaActualizacion] [datetime] NULL,
  CONSTRAINT [PK_Usuario] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
@@ -228,8 +228,8 @@ CREATE TABLE [dbo].[Pizarras](
 	[UsuarioId] [int] NOT NULL,
 	[Filas] [int] NOT NULL,
 	[Columnas] [int] NOT NULL,
-	[Nombre] [varchar](MAX) NOT NULL,
-	[UltimaActualizacion] datetime2 NOT NULL,
+	[Nombre] [varchar](70) NOT NULL,
+	[UltimaActualizacion] datetime NOT NULL,
 
  CONSTRAINT [PK_Pizarras] PRIMARY KEY CLUSTERED 
 (
@@ -246,6 +246,27 @@ GO
 
 ALTER TABLE [dbo].[Pizarras] CHECK CONSTRAINT [FK_Pizarras_Usuarios]
 GO
+
+/****** Object:  Table [dbo].[Estadisticas]    Script Date: 1/11/2022 20:18:51 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Estadisticas](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Identificacion] [varchar](50) NOT NULL,
+	[PictogramaPrevio] [int] NULL,
+	[Pictograma] [int] NOT NULL,
+	[Usuario] [int] NOT NULL,
+	[Fecha] [datetime] NOT NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Estadisticas] ADD  DEFAULT ('2022-09-13 19:56:54.710') FOR [Fecha]
+GO
+
 /** Object:  Table [dbo].[CeldaPizarra]    Script Date: 6/9/2022 19:52:07 **/
 SET ANSI_NULLS ON
 GO
@@ -256,6 +277,7 @@ GO
 CREATE TABLE [dbo].[CeldaPizarra](
     [Id] [int] IDENTITY(1,1) NOT NULL,
     [PizarraId] [int] NOT NULL,
+	[UsuarioId] [int] NOT NULL,
     [Fila] [int] NOT NULL,
     [Columna] [int] NOT NULL,
     [Contenido] [nvarchar](100) NULL,

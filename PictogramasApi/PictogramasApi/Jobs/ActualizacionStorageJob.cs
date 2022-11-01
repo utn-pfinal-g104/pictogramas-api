@@ -63,7 +63,17 @@ namespace PictogramasApi.Jobs
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
             foreach (var keyword in palabrasClaves)
-                keyword.IdPictograma = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma).Id;
+            {
+                try
+                {
+                    var pic = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma);
+                    keyword.IdPictograma = pic != null ? pic.Id : 0;
+                }
+                catch(Exception ex)
+                {
+                     
+                }
+            }
 
             // INSERT KEYWORDS
             await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
@@ -124,9 +134,9 @@ namespace PictogramasApi.Jobs
                                 {
                                     using (Bitmap bmp = new Bitmap(
                                         image1.Width + image2.Width >= image3.Width + image4.Width ?
-                                            image1.Width + image2.Width : image3.Width + image4.Width,
+                                            image1.Width + image2.Width + 80 : image3.Width + image4.Width + 80,
                                         image1.Height + image3.Height >= image2.Height + image4.Height ?
-                                            image1.Height + image3.Height : image2.Height + image4.Height))
+                                            image1.Height + image3.Height + 80 : image2.Height + image4.Height + 80))
                                     {
                                         using (Graphics g = Graphics.FromImage(bmp))
                                         {
@@ -134,10 +144,10 @@ namespace PictogramasApi.Jobs
                                             {
                                                 g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height);
                                             }
-                                            g.DrawImage(image1, 0, 0, image1.Width, image1.Height);
-                                            g.DrawImage(image2, image1.Width, 0, image1.Width + image2.Width, image2.Height);
-                                            g.DrawImage(image3, 0, image1.Height, image3.Width, image1.Height + image3.Height);
-                                            g.DrawImage(image4, image3.Width, image2.Height, image4.Width, image2.Height + image4.Height);
+                                            g.DrawImage(image1, 5, 5, image1.Width + 10, image1.Height + 10);
+                                            g.DrawImage(image2, image1.Width + 45, 5, image2.Width + 10, image2.Height + 10);
+                                            g.DrawImage(image3, 5, image1.Height + 15, image3.Width + 30, image3.Height + 30);
+                                            g.DrawImage(image4, image3.Width + 45, image2.Height + 15, image4.Width + 30, image4.Height + 30);
 
                                             var stream = new System.IO.MemoryStream();
                                             bmp.Save(stream, ImageFormat.Jpeg);

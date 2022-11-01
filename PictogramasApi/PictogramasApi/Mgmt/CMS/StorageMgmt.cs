@@ -17,8 +17,11 @@ namespace PictogramasApi.Mgmt.CMS
             _configuration = configuration;
             _connectionString = _configuration.GetValue<string>("Storage:ConnectionString");
             container = new BlobContainerClient(_connectionString, _configuration.GetValue<string>("Storage:Container"));
+            container.CreateIfNotExists();
             categoriasContainer = new BlobContainerClient(_connectionString, "categorias");
+            categoriasContainer.CreateIfNotExists();
             usuariosContainer = new BlobContainerClient(_connectionString, "usuarios");
+            usuariosContainer.CreateIfNotExists();
         }
 
         public void Guardar(Stream file, string fileName)
