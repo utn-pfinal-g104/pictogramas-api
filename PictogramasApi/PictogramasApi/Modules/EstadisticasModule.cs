@@ -127,6 +127,13 @@ namespace PictogramasApi.Modules
             {
                 var estadisticaRequest = await ctx.Request.Bind<EstadisticaRequest>();
 
+                if (estadisticaRequest.Usuario == 0)
+                {
+                    ctx.Response.StatusCode = 200;
+                    await ctx.Response.AsJson("No es una estadistica");
+                    return;
+                }
+
                 var estadisticas = new List<Estadistica>();
 
                 if (estadisticaRequest.Previo == null)
