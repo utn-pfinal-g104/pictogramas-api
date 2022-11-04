@@ -30,7 +30,7 @@ namespace PictogramasApi.Configuration
                 {
                     _logger.LogInformation($"Se intenta conectar a la db para ejecutar el script de creacion - {DateTime.Now}");
                     connection.Open();
-                    string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Scripts\Script creacion pictogramasdblocal.sql");
+                    string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"Scripts{Path.DirectorySeparatorChar}Script creacion pictogramasdblocal.sql");
                     string script = File.ReadAllText(@path);
                     var statements = SplitSqlStatements(script);
                     foreach (var statement in statements)
