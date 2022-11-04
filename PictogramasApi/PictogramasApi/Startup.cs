@@ -98,6 +98,7 @@ namespace PictogramasApi
                 builder.MapDefaultControllerRoute();
                 builder.MapCarter();
             });
+            app.UseHttpsRedirection();
         }
     }
 }
