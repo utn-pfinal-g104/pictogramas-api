@@ -54,7 +54,7 @@ services:
         # env_file: 
         #     - ./environments/dev/pictogar-web_dev.env
         ports: 
-            - "3000:3000"
+            - "80:3000"
         networks:
             - pictogar-exposed-to-clients-network
         volumes:
