@@ -64,7 +64,7 @@ namespace PictogramasApi.Jobs
 
             // INSERT PICTOGRAMAS
             await _pictogramaMgmt.AgregarPictogramas(pictogramas);
-            _logger.LogInformation($"Se insertaron los pictogramas, total pictogramas: {pictogramas.Count}");
+            _logger.LogInformation($"Se insertaron los pictogramas, total pictogramas: {pictogramas.Count} - {DateTime.Now}");
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
             foreach (var keyword in palabrasClaves)
@@ -82,7 +82,7 @@ namespace PictogramasApi.Jobs
 
             // INSERT KEYWORDS
             await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
-            _logger.LogInformation($"Se insertaron las palabras claves, total palabras claves: {palabrasClaves.Count}");
+            _logger.LogInformation($"Se insertaron las palabras claves, total palabras claves: {palabrasClaves.Count} - {DateTime.Now}");
 
             // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
             List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
@@ -92,7 +92,7 @@ namespace PictogramasApi.Jobs
 
             //// INSERT PICTOGRAMAS X CATEGORIAS
             await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
-            _logger.LogInformation($"Se insertaron las relaciones de pictogramas por categorias, total relaciones: {picsXcats.Count}");
+            _logger.LogInformation($"Se insertaron las relaciones de pictogramas por categorias, total relaciones: {picsXcats.Count} - {DateTime.Now}");
 
             //Guardar imagenes en Storage
             List<Stream> pictogramasAsStreams = new List<Stream>();
@@ -114,7 +114,7 @@ namespace PictogramasApi.Jobs
 
             // Generar imagenes de categorias
             GenerarImagenesDeCategorias(categoriasNuestras, pictogramasNuestros, picsXcats);
-            _logger.LogInformation($"Se generaron las imagenes de categorias");
+            _logger.LogInformation($"Se generaron las imagenes de categorias - {DateTime.Now}");
         }
 
         private void GenerarImagenesDeCategorias(List<Categoria> categoriasNuestras, List<Pictograma> pictogramasNuestros, List<PictogramaPorCategoria> picsXcats)

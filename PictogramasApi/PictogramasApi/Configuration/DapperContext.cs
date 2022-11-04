@@ -28,6 +28,7 @@ namespace PictogramasApi.Configuration
             {
                 using (IDbConnection connection = CreateConnection())
                 {
+                    _logger.LogInformation($"Se intenta conectar a la db para ejecutar el script de creacion - {DateTime.Now}");
                     connection.Open();
                     string path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Scripts\Script creacion pictogramasdblocal.sql");
                     string script = File.ReadAllText(@path);
@@ -38,11 +39,13 @@ namespace PictogramasApi.Configuration
                         _logger.LogInformation($"Se ejecuto statement del script de creacion de BD");
                     }
                     connection.Close();
+
+                    _logger.LogInformation($"Se finalizo la ejecucion del script - {DateTime.Now}");
                 }
             }
             catch(Exception ex)
             {
-                _logger.LogInformation($"Fallo la ejecucion del script de creacion de BD: {ex.Message}");
+                _logger.LogInformation($"Fallo la ejecucion del script de creacion de BD: {ex.Message} - {DateTime.Now}");
             }
         }
 

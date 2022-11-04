@@ -20,5 +20,9 @@ namespace PictogramasApi
                         options.Limits.MaxRequestBodySize = null;
                     });
                 });
+                //}).ConfigureLogging((hostingContext, loggingBuilder) =>
+                //{
+                //    loggingBuilder.AddFile("Logs/myapp-{Date}.txt");
+                //});
     }
 }
