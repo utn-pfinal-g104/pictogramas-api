@@ -248,7 +248,8 @@ namespace PictogramasApi.Jobs
                     Schematic = pictograma.schematic,
                     Sex = pictograma.sex,
                     Skin = pictograma.skin,
-                    Violence = pictograma.violence
+                    Violence = pictograma.violence,
+                    UltimaActualizacion = DateTime.Now
                 });
             }
             return pictogramas;

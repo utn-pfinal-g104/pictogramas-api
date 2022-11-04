@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Scripts\Script creacion pictogramasdblocal.sql">
+    <None Update="Scripts\Script-creacion-pictogramasdblocal.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
