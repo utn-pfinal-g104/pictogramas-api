@@ -1,4 +1,5 @@
-﻿using PictogramasApi.Mgmt.CMS;
+﻿using Microsoft.Extensions.Logging;
+using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Model;
 using PictogramasApi.Services;
@@ -23,11 +24,12 @@ namespace PictogramasApi.Jobs
         private readonly IPictogramaPorCategoriaMgmt _pictogramaPorCategoriaMgmt;
 
         private readonly ArasaacService _arasaacService;
+        private readonly ILogger<ActualizacionStorageJob> _logger;
 
         public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt, 
             IPalabraClaveMgmt palabraClaveMgmt,
             IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt, ArasaacService arasaacService,
-            IStorageMgmt storageMgmt, ICategoriaMgmt categoriaMgmt)
+            IStorageMgmt storageMgmt, ICategoriaMgmt categoriaMgmt, ILogger<ActualizacionStorageJob> logger)
         {
             _pictogramaMgmt = pictogramaMgmt;
             _storageMgmt = storageMgmt;
@@ -36,6 +38,7 @@ namespace PictogramasApi.Jobs
             _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
 
             _arasaacService = arasaacService;
+            _logger = logger;
         }
 
         public Task Execute(IJobExecutionContext context)
@@ -50,8 +53,9 @@ namespace PictogramasApi.Jobs
             // Se comenta y descomenta lo que se desea utilizar
             // Dejo esto hasta que el metodo este finalizado
             //throw new NotImplementedException();
-
+            _logger.LogInformation($"Se inicia la actualizacion de pictogramas");
             List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
+            _logger.LogInformation($"Se obtuvieron los pictogramas de arasaac, total pictogramas: {pictogramasArasaac.Count}");
 
             List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
             List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
@@ -60,6 +64,7 @@ namespace PictogramasApi.Jobs
 
             // INSERT PICTOGRAMAS
             await _pictogramaMgmt.AgregarPictogramas(pictogramas);
+            _logger.LogInformation($"Se insertaron los pictogramas, total pictogramas: {pictogramas.Count}");
 
             var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
             foreach (var keyword in palabrasClaves)
@@ -77,6 +82,7 @@ namespace PictogramasApi.Jobs
 
             // INSERT KEYWORDS
             await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
+            _logger.LogInformation($"Se insertaron las palabras claves, total palabras claves: {palabrasClaves.Count}");
 
             // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
             List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
@@ -86,6 +92,7 @@ namespace PictogramasApi.Jobs
 
             //// INSERT PICTOGRAMAS X CATEGORIAS
             await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
+            _logger.LogInformation($"Se insertaron las relaciones de pictogramas por categorias, total relaciones: {picsXcats.Count}");
 
             //Guardar imagenes en Storage
             List<Stream> pictogramasAsStreams = new List<Stream>();
@@ -97,7 +104,7 @@ namespace PictogramasApi.Jobs
                 {
                     var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
                     _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
-                    Console.WriteLine($"Se inserto pictograma: {pictograma._id}");
+                    _logger.LogInformation($"Se descargo y guardo el pictograma de arasaac {pictograma._id}");
                 });
             }
             catch (Exception e)
@@ -107,6 +114,7 @@ namespace PictogramasApi.Jobs
 
             // Generar imagenes de categorias
             GenerarImagenesDeCategorias(categoriasNuestras, pictogramasNuestros, picsXcats);
+            _logger.LogInformation($"Se generaron las imagenes de categorias");
         }
 
         private void GenerarImagenesDeCategorias(List<Categoria> categoriasNuestras, List<Pictograma> pictogramasNuestros, List<PictogramaPorCategoria> picsXcats)

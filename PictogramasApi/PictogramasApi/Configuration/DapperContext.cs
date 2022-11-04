@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,11 +16,13 @@ namespace PictogramasApi.Configuration
     {
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly ILogger<DapperContext> _logger;
 
-        public DapperContext(IConfiguration configuration)
+        public DapperContext(IConfiguration configuration, ILogger<DapperContext> logger)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("SqlConnection");
+            _logger = logger;
 
             try
             {
@@ -32,13 +35,14 @@ namespace PictogramasApi.Configuration
                     foreach (var statement in statements)
                     {
                         connection.Execute(statement);
+                        _logger.LogInformation($"Se ejecuto statement del script de creacion de BD");
                     }
                     connection.Close();
                 }
             }
             catch(Exception ex)
             {
-
+                _logger.LogInformation($"Fallo la ejecucion del script de creacion de BD");
             }
         }
 
