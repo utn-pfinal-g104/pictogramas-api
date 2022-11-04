@@ -67,9 +67,10 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                         + (p.Skin ? 1 : 0) + ","
                         + (p.Hair ? 1 : 0) + ","
                         + p.IdArasaac + ","
-                        + "null" + ")"
+                        + "null" + ","
+                        + $"'{p.UltimaActualizacion}'" + ")"
                     ));
-                    string insert = $"insert into Pictogramas (Schematic,Sex,Violence,Aac,AacColor,Skin,Hair,IdArasaac,IdUsuario) values {result}";
+                    string insert = $"insert into Pictogramas (Schematic,Sex,Violence,Aac,AacColor,Skin,Hair,IdArasaac,IdUsuario, UltimaActualizacion) values {result}";
                     using (IDbConnection connection = _context.CreateConnection())
                     {
                         connection.Open();
