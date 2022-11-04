@@ -18,6 +18,7 @@ services:
             - pictogar-storage-volume:/data
     pictogar-database:
         image: "mcr.microsoft.com/mssql/server:2019-CU11-ubuntu-20.04"
+        user: root 
         container_name: pictogar-database
         restart: unless-stopped
         environment:
@@ -28,7 +29,7 @@ services:
         networks:
             - pictogar-inner-network  
         volumes:
-            - pictogar-database-volume:/data
+            - pictogar-database-volume:/var/opt/mssql/data
     pictogar-api:
         image: "ghcr.io/utn-pfinal-g104/pictogar-api:latest"
         container_name: pictogar-api
