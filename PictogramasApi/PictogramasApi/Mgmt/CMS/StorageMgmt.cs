@@ -1,6 +1,11 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace PictogramasApi.Mgmt.CMS
 {
@@ -11,9 +16,11 @@ namespace PictogramasApi.Mgmt.CMS
         private readonly BlobContainerClient container;
         private readonly BlobContainerClient categoriasContainer;
         private readonly BlobContainerClient usuariosContainer;
+        private readonly ILogger<StorageMgmt> _logger;
 
-        public StorageMgmt(IConfiguration configuration)
+        public StorageMgmt(IConfiguration configuration, ILogger<StorageMgmt> logger)
         {
+            _logger = logger;
             _configuration = configuration;
             _connectionString = _configuration.GetValue<string>("Storage:ConnectionString");
             container = new BlobContainerClient(_connectionString, _configuration.GetValue<string>("Storage:Container"));
@@ -70,6 +77,64 @@ namespace PictogramasApi.Mgmt.CMS
         {
             BlobClient blob = container.GetBlobClient(filename);
             blob.DeleteIfExists();
+        }
+
+        public async Task<List<string>> ObtenerTotalImagenesPictogramas()
+        {
+            List<string> archivos = new List<string>();
+
+            var resultSegment = container.GetBlobsAsync()
+                .AsPages(default, 100);
+
+            // Enumerate the blobs returned for each page.
+            await foreach (Azure.Page<BlobItem> blobPage in resultSegment)
+            {
+                foreach (BlobItem blobItem in blobPage.Values)
+                {
+                    _logger.LogInformation($"Blob name: {blobItem.Name} - {DateTime.Now}");
+                    archivos.Add(blobItem.Name);
+                }
+            }
+
+            return archivos;
+        }
+
+        public void BorrarTodasLasImagenesPictogramas(List<string> archivos)
+        {
+            Parallel.ForEach(archivos, archivo =>
+            {
+                BlobClient blob = container.GetBlobClient(archivo);
+                blob.DeleteIfExists();
+            });
+        }
+
+        public async Task<List<string>> ObtenerTotalImagenesCategorias()
+        {
+            List<string> archivos = new List<string>();
+
+            var resultSegment = categoriasContainer.GetBlobsAsync()
+                .AsPages(default, 100);
+
+            // Enumerate the blobs returned for each page.
+            await foreach (Azure.Page<BlobItem> blobPage in resultSegment)
+            {
+                foreach (BlobItem blobItem in blobPage.Values)
+                {
+                    _logger.LogInformation($"Blob name: {blobItem.Name} - {DateTime.Now}");
+                    archivos.Add(blobItem.Name);
+                }
+            }
+
+            return archivos;
+        }
+
+        public void BorrarTodasLasImagenesCategorias(List<string> archivos)
+        {
+            Parallel.ForEach(archivos, archivo =>
+            {
+                BlobClient blob = categoriasContainer.GetBlobClient(archivo);
+                blob.DeleteIfExists();
+            });
         }
     }
 }

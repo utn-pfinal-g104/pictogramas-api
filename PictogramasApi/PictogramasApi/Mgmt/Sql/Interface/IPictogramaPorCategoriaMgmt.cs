@@ -9,6 +9,7 @@ namespace PictogramasApi.Mgmt.Sql.Interface
     {
         Task AgregarRelaciones(Pictograma pictograma, List<Categoria> categorias);
         Task AgregarRelaciones(List<PictogramaPorCategoria> picsXcats);
+        Task<List<PictogramaPorCategoria>> ObtenerTotalPictogramasPorCategoria();
         Task<List<PictogramaPorCategoria>> ObtenerPictogramasPorCategoria(int categoria);
         List<PictogramaPorCategoria> ObtenerCategoriasPorPictograma(int pictograma);
         Task EliminarRelaciones();

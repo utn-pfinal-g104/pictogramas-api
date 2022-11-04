@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace PictogramasApi.Mgmt.CMS
 {
@@ -11,5 +13,9 @@ namespace PictogramasApi.Mgmt.CMS
         Stream ObtenerImagenCategoria(string filename);
         void GuardarImagenUsuario(Stream file, string fileName);
         Stream ObtenerImagenUsuario(string filename);
+        Task<List<string>> ObtenerTotalImagenesPictogramas();
+        Task<List<string>> ObtenerTotalImagenesCategorias();
+        void BorrarTodasLasImagenesPictogramas(List<string> archivos);
+        void BorrarTodasLasImagenesCategorias(List<string> archivos);
     }
 }

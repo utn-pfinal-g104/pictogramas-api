@@ -124,5 +124,23 @@ namespace PictogramasApi.Mgmt.Sql.Impl
                 throw ex;
             }
         }
+
+        public async Task<List<PictogramaPorCategoria>> ObtenerTotalPictogramasPorCategoria()
+        {
+            try
+            {
+                using (IDbConnection connection = _context.CreateConnection())
+                {
+                    connection.Open();
+                    var picsXcat = (connection.GetList<PictogramaPorCategoria>()).ToList();
+                    connection.Close();
+                    return picsXcat;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 }

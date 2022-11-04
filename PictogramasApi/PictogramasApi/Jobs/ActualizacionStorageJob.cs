@@ -26,7 +26,7 @@ namespace PictogramasApi.Jobs
         private readonly ArasaacService _arasaacService;
         private readonly ILogger<ActualizacionStorageJob> _logger;
 
-        public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt, 
+        public ActualizacionStorageJob(IPictogramaMgmt pictogramaMgmt,
             IPalabraClaveMgmt palabraClaveMgmt,
             IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt, ArasaacService arasaacService,
             IStorageMgmt storageMgmt, ICategoriaMgmt categoriaMgmt, ILogger<ActualizacionStorageJob> logger)
@@ -50,129 +50,183 @@ namespace PictogramasApi.Jobs
 
         internal async Task ActualizarPictogramas()
         {
-            // Se comenta y descomenta lo que se desea utilizar
-            // Dejo esto hasta que el metodo este finalizado
-            //throw new NotImplementedException();
-            _logger.LogInformation($"Se inicia la actualizacion de pictogramas");
-            List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
-            _logger.LogInformation($"Se obtuvieron los pictogramas de arasaac, total pictogramas: {pictogramasArasaac.Count}");
-
-            List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
-            List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
-            List<Tag> tags = ObtenerTags(pictogramasArasaac);
-            List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
-
-            // INSERT PICTOGRAMAS
-            await _pictogramaMgmt.AgregarPictogramas(pictogramas);
-            _logger.LogInformation($"Se insertaron los pictogramas, total pictogramas: {pictogramas.Count} - {DateTime.Now}");
-
-            var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
-            foreach (var keyword in palabrasClaves)
-            {
-                try
-                {
-                    var pic = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma);
-                    keyword.IdPictograma = pic != null ? pic.Id : 0;
-                }
-                catch(Exception ex)
-                {
-                     
-                }
-            }
-
-            // INSERT KEYWORDS
-            await _palabraClaveMgmt.AgregarPalabrasClaves(palabrasClaves);
-            _logger.LogInformation($"Se insertaron las palabras claves, total palabras claves: {palabrasClaves.Count} - {DateTime.Now}");
-
-            // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
-            List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
-            // Tambien agrega tags como categorias
-            List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
-
-
-            //// INSERT PICTOGRAMAS X CATEGORIAS
-            await _pictogramaPorCategoriaMgmt.AgregarRelaciones(picsXcats);
-            _logger.LogInformation($"Se insertaron las relaciones de pictogramas por categorias, total relaciones: {picsXcats.Count} - {DateTime.Now}");
-
-            //Guardar imagenes en Storage
-            List<Stream> pictogramasAsStreams = new List<Stream>();
             try
             {
-                Parallel.ForEach(pictogramasArasaac,
-                    //new ParallelOptions { MaxDegreeOfParallelism = 10 },
-                    async (pictograma) =>
+                // Se comenta y descomenta lo que se desea utilizar
+                // Dejo esto hasta que el metodo este finalizado
+                //throw new NotImplementedException();
+
+                _logger.LogInformation($"Se inicia la actualizacion de pictogramas - {DateTime.Now}");
+                List<Model.Responses.Pictograma> pictogramasArasaac = await _arasaacService.ObtenerPictogramasDeArasaac();
+                _logger.LogInformation($"Se obtuvieron los pictogramas de arasaac, total pictogramas: {pictogramasArasaac.Count} - {DateTime.Now}");
+
+                List<Pictograma> pictogramas = MapearPictogramas(pictogramasArasaac);
+                List<Categoria> categorias = ObtenerCategorias(pictogramasArasaac);
+                List<Tag> tags = ObtenerTags(pictogramasArasaac);
+                List<PalabraClave> palabrasClaves = ObtenerPalabrasClaves(pictogramasArasaac);
+
+                // INSERT PICTOGRAMAS - Solo inserta los pictogramas faltantes de agregar
+                var pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
+                _logger.LogInformation($"Total pictogramas actuales: {pictogramasNuestros.Count} - {DateTime.Now}");
+                if (pictogramasNuestros.Count < pictogramas.Count)
                 {
-                    var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
-                    _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
-                    _logger.LogInformation($"Se descargo y guardo el pictograma de arasaac {pictograma._id}");
-                });
+                    var pictogramasAAgregar = pictogramas.Where(p => !pictogramasNuestros.Any(pic => pic.IdArasaac == p.IdArasaac)).ToList();
+
+                    await _pictogramaMgmt.AgregarPictogramas(pictogramasAAgregar);
+                    _logger.LogInformation($"Se insertaron los pictogramas, total pictogramas agregados: {pictogramasAAgregar.Count} - {DateTime.Now}");
+
+                    pictogramasNuestros = await _pictogramaMgmt.ObtenerPictogramas(null);
+                    _logger.LogInformation($"Total pictogramas: {pictogramasNuestros.Count} - {DateTime.Now}");
+                }
+                else
+                    _logger.LogInformation($"No hizo falta agregar nuevos pictogramas - {DateTime.Now}");
+
+                foreach (var keyword in palabrasClaves)
+                {
+                    try
+                    {
+                        var pic = pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == keyword.IdPictograma);
+                        keyword.IdPictograma = pic != null ? pic.Id : 0;
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+
+                // INSERT KEYWORDS
+                var keywordsNuestras = await _palabraClaveMgmt.ObtenerKeywords();
+                if (keywordsNuestras.Count < palabrasClaves.Count)
+                {
+                    var keywordsAAgregar = palabrasClaves.Where(p => !keywordsNuestras.Any(pc => (pc.Keyword == p.Keyword && pc.IdPictograma == p.IdPictograma))).ToList();
+
+                    await _palabraClaveMgmt.AgregarPalabrasClaves(keywordsAAgregar);
+                    _logger.LogInformation($"Se insertaron las palabras claves, total palabras claves agregadas: {keywordsAAgregar.Count} - {DateTime.Now}");
+                }
+                else
+                    _logger.LogInformation($"No hizo falta agregar nuevas palabras claves - {DateTime.Now}");
+
+                // TODO: No se deben unificar mas las categorias con los tags, y solo se debe tener asociado al pictograma las categorias y no los tags
+                List<Categoria> categoriasNuestras = await _categoriaMgmt.ObtenerCategorias();
+
+
+                //// INSERT PICTOGRAMAS X CATEGORIAS
+                // Tambien agrega tags como categorias
+                var relacionesNuestras = await _pictogramaPorCategoriaMgmt.ObtenerTotalPictogramasPorCategoria();
+                List<PictogramaPorCategoria> picsXcats = ObtenerPictogramasPorCategorias(categoriasNuestras, pictogramasNuestros, pictogramasArasaac);
+
+                if (relacionesNuestras.Count < picsXcats.Count)
+                {
+                    var pxcAAgregar = picsXcats.Where(p => !relacionesNuestras.Any(pc => (pc.IdCategoria == p.IdCategoria && pc.IdPictograma == p.IdPictograma))).ToList();
+
+                    await _pictogramaPorCategoriaMgmt.AgregarRelaciones(pxcAAgregar);
+                    _logger.LogInformation($"Se insertaron las relaciones de pictogramas por categorias, total relaciones: {picsXcats.Count} - {DateTime.Now}");
+                }
+                else
+                    _logger.LogInformation($"No hizo falta agregar nuevas relaciones de pictogramas por categorias - {DateTime.Now}");
+
+                //Guardar imagenes en Storage
+                var pictogramasGuardados = await _storageMgmt.ObtenerTotalImagenesPictogramas();
+                _logger.LogInformation($"Total imagenes de pictogramas locales actualmente {pictogramasGuardados.Count} - {DateTime.Now}");
+                List<Stream> pictogramasAsStreams = new List<Stream>();
+                if (pictogramasGuardados.Count < pictogramasArasaac.Count)
+                {
+                    var pictogramasAAgregar = pictogramasArasaac.Where(p => !pictogramasGuardados.Contains(p._id.ToString())).ToList();
+
+                    Parallel.ForEach(pictogramasAAgregar,
+                        //new ParallelOptions { MaxDegreeOfParallelism = 10 },
+                        async (pictograma) =>
+                    {
+                        try
+                        {
+                            var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
+                            _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
+                            _logger.LogInformation($"Se descargo y guardo el pictograma de arasaac {pictograma._id} - {DateTime.Now}");
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    });
+                    _logger.LogInformation($"Total imagenes de pictogramas guardadas en el storage {pictogramasAAgregar.Count} - {DateTime.Now}");
+                }
+
+                // Generar imagenes de categorias
+                await GenerarImagenesDeCategorias(categoriasNuestras, pictogramasNuestros, picsXcats);
+                _logger.LogInformation($"Se generaron las imagenes de categorias - {DateTime.Now}");
             }
             catch (Exception e)
             {
-                throw e;
+                _logger.LogInformation($"Ocurrio un error en la actualizacion de pictogramas: {e.Message} - {DateTime.Now}");
             }
-
-            // Generar imagenes de categorias
-            GenerarImagenesDeCategorias(categoriasNuestras, pictogramasNuestros, picsXcats);
-            _logger.LogInformation($"Se generaron las imagenes de categorias - {DateTime.Now}");
         }
 
-        private void GenerarImagenesDeCategorias(List<Categoria> categoriasNuestras, List<Pictograma> pictogramasNuestros, List<PictogramaPorCategoria> picsXcats)
+        private async Task GenerarImagenesDeCategorias(List<Categoria> categoriasNuestras, List<Pictograma> pictogramasNuestros, List<PictogramaPorCategoria> picsXcats)
         {
-            foreach (var categoria in categoriasNuestras)
+            var imagenesCategoriasGuardadas = await _storageMgmt.ObtenerTotalImagenesCategorias();
+            _logger.LogInformation($"Total imagenes de categorias locales actualmente {imagenesCategoriasGuardadas.Count}");
+            if (imagenesCategoriasGuardadas.Count < categoriasNuestras.Count)
             {
-                try
+                var categoriasAAgregar = categoriasNuestras.Where(c => !imagenesCategoriasGuardadas.Contains(c.Id.ToString())).ToList();
+                _logger.LogInformation($"Total imagenes de categorias a guardar {categoriasAAgregar.Count}");
+                foreach (var categoria in categoriasAAgregar)
                 {
-                    var pictogramasFiltrados = pictogramasNuestros.Where(p => p.Sex == false && p.Violence == false);
-                    var pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
-                    var pictograma1 = pictogramasDeCategoria[0] != null ? pictogramasDeCategoria[0].IdPictograma : 0;
-                    var pictograma2 = pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : 0;
-                    var pictograma3 = pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : 0;
-                    var pictograma4 = pictogramasDeCategoria[3] != null ? pictogramasDeCategoria[3].IdPictograma : 0;
-                    var imagen1 = _storageMgmt.Obtener(pictograma1.ToString());
-                    var imagen2 = _storageMgmt.Obtener(pictograma2.ToString());
-                    var imagen3 = _storageMgmt.Obtener(pictograma3.ToString());
-                    var imagen4 = _storageMgmt.Obtener(pictograma4.ToString());
-                    using (Image image1 = Image.FromStream(imagen1))
+                    try
                     {
-                        using (Image image2 = Image.FromStream(imagen2))
+                        var pictogramasFiltrados = pictogramasNuestros.Where(p => p.Sex == false && p.Violence == false);
+                        var pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                        var pictograma1 = pictogramasDeCategoria[0] != null ? pictogramasDeCategoria[0].IdPictograma : 0;
+                        var pictograma2 = pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : 0;
+                        var pictograma3 = pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : 0;
+                        var pictograma4 = pictogramasDeCategoria[3] != null ? pictogramasDeCategoria[3].IdPictograma : 0;
+                        var imagen1 = _storageMgmt.Obtener(pictograma1.ToString());
+                        var imagen2 = _storageMgmt.Obtener(pictograma2.ToString());
+                        var imagen3 = _storageMgmt.Obtener(pictograma3.ToString());
+                        var imagen4 = _storageMgmt.Obtener(pictograma4.ToString());
+                        using (Image image1 = Image.FromStream(imagen1))
                         {
-                            using (Image image3 = Image.FromStream(imagen3))
+                            using (Image image2 = Image.FromStream(imagen2))
                             {
-                                using (Image image4 = Image.FromStream(imagen4))
+                                using (Image image3 = Image.FromStream(imagen3))
                                 {
-                                    using (Bitmap bmp = new Bitmap(
-                                        image1.Width + image2.Width >= image3.Width + image4.Width ?
-                                            image1.Width + image2.Width + 80 : image3.Width + image4.Width + 80,
-                                        image1.Height + image3.Height >= image2.Height + image4.Height ?
-                                            image1.Height + image3.Height + 80 : image2.Height + image4.Height + 80))
+                                    using (Image image4 = Image.FromStream(imagen4))
                                     {
-                                        using (Graphics g = Graphics.FromImage(bmp))
+                                        using (Bitmap bmp = new Bitmap(
+                                            image1.Width + image2.Width >= image3.Width + image4.Width ?
+                                                image1.Width + image2.Width + 80 : image3.Width + image4.Width + 80,
+                                            image1.Height + image3.Height >= image2.Height + image4.Height ?
+                                                image1.Height + image3.Height + 80 : image2.Height + image4.Height + 80))
                                         {
-                                            using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 255, 255)))
+                                            using (Graphics g = Graphics.FromImage(bmp))
                                             {
-                                                g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height);
+                                                using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 255, 255)))
+                                                {
+                                                    g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height);
+                                                }
+                                                g.DrawImage(image1, 5, 5, image1.Width + 10, image1.Height + 10);
+                                                g.DrawImage(image2, image1.Width + 45, 5, image2.Width + 10, image2.Height + 10);
+                                                g.DrawImage(image3, 5, image1.Height + 15, image3.Width + 30, image3.Height + 30);
+                                                g.DrawImage(image4, image3.Width + 45, image2.Height + 15, image4.Width + 30, image4.Height + 30);
+
+                                                var stream = new System.IO.MemoryStream();
+                                                bmp.Save(stream, ImageFormat.Jpeg);
+                                                stream.Position = 0;
+                                                _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
+                                                _logger.LogInformation($"Se guardo la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
                                             }
-                                            g.DrawImage(image1, 5, 5, image1.Width + 10, image1.Height + 10);
-                                            g.DrawImage(image2, image1.Width + 45, 5, image2.Width + 10, image2.Height + 10);
-                                            g.DrawImage(image3, 5, image1.Height + 15, image3.Width + 30, image3.Height + 30);
-                                            g.DrawImage(image4, image3.Width + 45, image2.Height + 15, image4.Width + 30, image4.Height + 30);
 
-                                            var stream = new System.IO.MemoryStream();
-                                            bmp.Save(stream, ImageFormat.Jpeg);
-                                            stream.Position = 0;
-                                            _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
                                         }
-
                                     }
                                 }
                             }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.LogInformation($"Fallo guardar imagen de categoria: {categoria.Id} - {ex.Message} - {DateTime.Now}");
+                    }
                 }
-                catch (Exception ex)
-                { 
-                }
+                _logger.LogInformation($"Se finalizo el guardado de imagenes de categorias - {DateTime.Now}");
             }
         }
 
@@ -195,7 +249,7 @@ namespace PictogramasApi.Jobs
                                 IdPictograma = pictogramas.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id
                             });
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
 
                         }
@@ -238,7 +292,8 @@ namespace PictogramasApi.Jobs
         {
             List<Pictograma> pictogramas = new List<Pictograma>();
 
-            foreach(var pictograma in pictogramasArasaac){
+            foreach (var pictograma in pictogramasArasaac)
+            {
                 pictogramas.Add(new Pictograma
                 {
                     Aac = pictograma.aac,
@@ -262,10 +317,10 @@ namespace PictogramasApi.Jobs
             {
                 foreach (var palabraClave in pictograma.keywords)
                     palabrasClaves.Add(new PalabraClave
-                    { 
+                    {
                         HasLocution = palabraClave.hasLocution,
                         IdPictograma = pictograma._id,
-                        Keyword = palabraClave.keyword != null ? String.Join("", palabraClave.keyword.Split(',', '\'', '"','@')) : "",
+                        Keyword = palabraClave.keyword != null ? String.Join("", palabraClave.keyword.Split(',', '\'', '"', '@')) : "",
                         Meaning = palabraClave.meaning != null ? String.Join("", Regex.Replace(palabraClave.meaning, @"\t|\n|\r", "").Split(',', '\'', '"', '@')) : "",
                         Plural = palabraClave.plural != null ? String.Join("", palabraClave.plural.Split(',', '\'', '"', '@')) : "",
                         Tipo = palabraClave.type
@@ -281,7 +336,7 @@ namespace PictogramasApi.Jobs
             {
                 foreach (var tag in pictograma.tags)
                 {
-                    if(!tags.Any(t => t.Nombre == tag))
+                    if (!tags.Any(t => t.Nombre == tag))
                         tags.Add(new Tag { Nombre = tag });
                 }
             }
@@ -295,7 +350,7 @@ namespace PictogramasApi.Jobs
             {
                 foreach (var categoria in pictograma.categories)
                 {
-                    if(!categorias.Any(c => categoria == c.Nombre))
+                    if (!categorias.Any(c => categoria == c.Nombre))
                         categorias.Add(new Categoria { Nombre = categoria });
                 }
             }
