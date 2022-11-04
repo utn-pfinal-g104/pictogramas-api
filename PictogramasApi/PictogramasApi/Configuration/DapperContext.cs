@@ -21,7 +21,7 @@ namespace PictogramasApi.Configuration
         public DapperContext(IConfiguration configuration, ILogger<DapperContext> logger)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("SqlConnection");
+            _connectionString = _configuration.GetConnectionString("SqlConnectionMaster");
             _logger = logger;
 
             try
@@ -42,7 +42,7 @@ namespace PictogramasApi.Configuration
             }
             catch(Exception ex)
             {
-                _logger.LogInformation($"Fallo la ejecucion del script de creacion de BD");
+                _logger.LogInformation($"Fallo la ejecucion del script de creacion de BD: {ex.Message}");
             }
         }
 
