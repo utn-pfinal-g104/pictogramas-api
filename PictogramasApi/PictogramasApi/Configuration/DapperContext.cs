@@ -16,17 +16,19 @@ namespace PictogramasApi.Configuration
     {
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly string _connectionStringMaster;
         private readonly ILogger<DapperContext> _logger;
 
         public DapperContext(IConfiguration configuration, ILogger<DapperContext> logger)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("SqlConnectionMaster");
+            _connectionString = _configuration.GetConnectionString("SqlConnection");
+            _connectionStringMaster = _configuration.GetConnectionString("SqlConnectionMaster");
             _logger = logger;
 
             try
             {
-                using (IDbConnection connection = CreateConnection())
+                using (IDbConnection connection = CreateConnectionMaster())
                 {
                     _logger.LogInformation($"Se intenta conectar a la db para ejecutar el script de creacion - {DateTime.Now}");
                     connection.Open();
@@ -49,6 +51,8 @@ namespace PictogramasApi.Configuration
             }
         }
 
+        private IDbConnection CreateConnectionMaster()
+            => new SqlConnection(_connectionStringMaster);
         public IDbConnection CreateConnection()
             => new SqlConnection(_connectionString);
 
