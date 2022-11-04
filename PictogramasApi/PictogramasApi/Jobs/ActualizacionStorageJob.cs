@@ -91,7 +91,9 @@ namespace PictogramasApi.Jobs
             List<Stream> pictogramasAsStreams = new List<Stream>();
             try
             {
-                Parallel.ForEach(pictogramasArasaac, async (pictograma) =>
+                Parallel.ForEach(pictogramasArasaac,
+                    //new ParallelOptions { MaxDegreeOfParallelism = 10 },
+                    async (pictograma) =>
                 {
                     var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
                     _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
