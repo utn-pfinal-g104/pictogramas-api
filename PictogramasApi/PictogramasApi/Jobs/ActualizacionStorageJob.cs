@@ -145,7 +145,7 @@ namespace PictogramasApi.Jobs
                         }
                         catch (Exception ex)
                         {
-
+                            _logger.LogInformation($"Error al guardar el pictograma {pictograma._id} en el storage - {ex.Message} - {DateTime.Now}");
                         }
                     });
                     _logger.LogInformation($"Total imagenes de pictogramas guardadas en el storage {pictogramasAAgregar.Count} - {DateTime.Now}");
