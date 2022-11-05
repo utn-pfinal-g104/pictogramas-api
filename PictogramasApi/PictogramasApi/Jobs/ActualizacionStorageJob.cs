@@ -129,25 +129,40 @@ namespace PictogramasApi.Jobs
                 var pictogramasGuardados = await _storageMgmt.ObtenerTotalImagenesPictogramas();
                 _logger.LogInformation($"Total imagenes de pictogramas locales actualmente {pictogramasGuardados.Count} - {DateTime.Now}");
                 List<Stream> pictogramasAsStreams = new List<Stream>();
-                if (pictogramasGuardados.Count < pictogramasArasaac.Count)
+                if (pictogramasGuardados.Count < pictogramasNuestros.Count)
                 {
-                    var pictogramasAAgregar = pictogramasArasaac.Where(p => !pictogramasGuardados.Contains(p._id.ToString())).ToList();
+                    var pictogramasAAgregar = pictogramasNuestros.Where(p => !pictogramasGuardados.Contains(p.Id.ToString())).ToList();
 
-                    Parallel.ForEach(pictogramasAAgregar,
-                        //new ParallelOptions { MaxDegreeOfParallelism = 10 },
-                        async (pictograma) =>
+                    foreach(var pictograma in pictogramasAAgregar)
                     {
                         try
                         {
-                            var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac(pictograma._id);
-                            _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma._id).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
-                            _logger.LogInformation($"Se descargo y guardo el pictograma de arasaac {pictograma._id} - {DateTime.Now}");
+                            var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac((int)pictograma.IdArasaac);
+                            _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma.IdArasaac).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
+                            _logger.LogInformation($"Se descargo y guardo el pictograma de arasaac {pictograma.IdArasaac} - {DateTime.Now}");
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogInformation($"Error al guardar el pictograma {pictograma._id} en el storage - {ex.Message} - {DateTime.Now}");
+                            _logger.LogInformation($"Error al guardar el pictograma {pictograma.IdArasaac} en el storage - {ex.Message} - {DateTime.Now}");
                         }
-                    });
+                    }
+
+                    // Para probar asincronismo
+                    //Parallel.ForEach(pictogramasAAgregar,
+                    //    //new ParallelOptions { MaxDegreeOfParallelism = 10 },
+                    //    async (pictograma) =>
+                    //{
+                    //    try
+                    //    {
+                    //        var pictogramaAsStream = await _arasaacService.ObtenerPictogramaDeArasaac((int)pictograma.IdArasaac);
+                    //        _storageMgmt.Guardar(pictogramaAsStream, $"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma.IdArasaac).Id}"); // TODO: Con que nombre lo guardamos? por ahora lo estamos guardando con el id
+                    //        _logger.LogInformation($"Se descargo y guardo el pictograma de arasaac {pictograma.IdArasaac} - {DateTime.Now}");
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        _logger.LogInformation($"Error al guardar el pictograma {pictograma.IdArasaac} en el storage - {ex.Message} - {DateTime.Now}");
+                    //    }
+                    //});
                     _logger.LogInformation($"Total imagenes de pictogramas guardadas en el storage {pictogramasAAgregar.Count} - {DateTime.Now}");
                 }
 
