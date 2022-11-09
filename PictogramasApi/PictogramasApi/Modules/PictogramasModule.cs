@@ -3,6 +3,7 @@ using Carter.ModelBinding;
 using Carter.Request;
 using Carter.Response;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using PictogramasApi.Jobs;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
@@ -29,10 +30,11 @@ namespace PictogramasApi.Modules
 
         private readonly ActualizacionStorageJob _actualizacionStorageJob;
         private readonly ArasaacService _arasaacService;
+        private readonly ILogger<PictogramasModule> _logger;
 
         public PictogramasModule(ArasaacService arasaacService, IPictogramaMgmt pictogramaMgmt, 
             IStorageMgmt storageMgmt, ActualizacionStorageJob actualizacionStorageJob, ICategoriaMgmt categoriaMgmt,
-            IPalabraClaveMgmt palabraClaveMgmt,
+            IPalabraClaveMgmt palabraClaveMgmt, ILogger<PictogramasModule> logger,
             IPictogramaPorCategoriaMgmt pictogramaPorCategoriaMgmt) : base("/pictogramas")
         {
             _pictogramaMgmt = pictogramaMgmt;
@@ -42,6 +44,7 @@ namespace PictogramasApi.Modules
             _pictogramaPorCategoriaMgmt = pictogramaPorCategoriaMgmt;
             _palabraClaveMgmt = palabraClaveMgmt;
             _categoriaMgmt = categoriaMgmt;
+            _logger = logger;
 
             #region "Arasaac"
             GetPictogramaPorIdDeArasaac();
@@ -66,10 +69,20 @@ namespace PictogramasApi.Modules
             GetPictogramaPorKeyword();
             GetPictogramasPorNombreCategoria();
             GetPictogramasPorCategoriaId();
+            GetTotalPictogramasGuardados();
 
             PostPictogramaPropio();
             DeletePictogramaDelStorage();
             #endregion "Storage"
+        }
+
+        private void GetTotalPictogramasGuardados()
+        {
+            Get("/imagenes/total", async (ctx) =>
+            {
+                var pictogramasSubidosArasaac = (await _storageMgmt.ObtenerTotalImagenesPictogramas()).Where(p => !p.Contains("_"));
+                await ctx.Response.Negotiate(pictogramasSubidosArasaac);
+            });
         }
 
         private void PostPictogramaPropio()
@@ -202,19 +215,27 @@ namespace PictogramasApi.Modules
         {
             Get("/{filename:minlength(1)}/obtener/base64", async (ctx) =>
             {
-                var filename = ctx.Request.RouteValues.As<string>("filename");
-
-                var pictograma = _storageMgmt.Obtener(filename);
-
-                if (pictograma != null)
+                try
                 {
-                    var stringEnBase64 = Parser.ConvertToBase64(pictograma);
-                    await ctx.Response.Negotiate(stringEnBase64);
+                    var filename = ctx.Request.RouteValues.As<string>("filename");
+
+                    var pictograma = _storageMgmt.Obtener(filename);
+
+                    if (pictograma != null)
+                    {
+                        var stringEnBase64 = Parser.ConvertToBase64(pictograma);
+                        await ctx.Response.Negotiate(stringEnBase64);
+                    }
+                    else
+                    {
+                        ctx.Response.StatusCode = 404;
+                        await ctx.Response.Negotiate("No existe el pictograma");
+                    }
                 }
-                else
+                catch(Exception ex)
                 {
-                    ctx.Response.StatusCode = 404;
-                    await ctx.Response.Negotiate("No existe el pictograma");
+                    _logger.LogError($"Error al obtener pictograma del storage: {ex.Message}");
+                    await ctx.Response.Negotiate($"Error al descargar pictograma: {ex.Message}");
                 }
             });
         }

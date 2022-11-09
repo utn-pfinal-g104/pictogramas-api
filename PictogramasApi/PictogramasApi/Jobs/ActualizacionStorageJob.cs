@@ -191,9 +191,9 @@ namespace PictogramasApi.Jobs
                         var pictogramasFiltrados = pictogramasNuestros.Where(p => p.Sex == false && p.Violence == false);
                         var pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
                         var pictograma1 = pictogramasDeCategoria[0] != null ? pictogramasDeCategoria[0].IdPictograma : 0;
-                        var pictograma2 = pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : 0;
-                        var pictograma3 = pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : 0;
-                        var pictograma4 = pictogramasDeCategoria[3] != null ? pictogramasDeCategoria[3].IdPictograma : 0;
+                        var pictograma2 = pictogramasDeCategoria.Count > 1 && pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : pictograma1;
+                        var pictograma3 = pictogramasDeCategoria.Count > 2 && pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : pictograma2;
+                        var pictograma4 = pictogramasDeCategoria.Count > 3 && pictogramasDeCategoria[3] != null ? pictogramasDeCategoria[3].IdPictograma : pictograma3;
                         var imagen1 = _storageMgmt.Obtener(pictograma1.ToString());
                         var imagen2 = _storageMgmt.Obtener(pictograma2.ToString());
                         var imagen3 = _storageMgmt.Obtener(pictograma3.ToString());
