@@ -83,17 +83,39 @@ namespace PictogramasApi.Mgmt.CMS
         {
             List<string> archivos = new List<string>();
 
-            var resultSegment = container.GetBlobsAsync()
-                .AsPages(default, 100);
-
-            // Enumerate the blobs returned for each page.
-            await foreach (Azure.Page<BlobItem> blobPage in resultSegment)
+            try
             {
-                foreach (BlobItem blobItem in blobPage.Values)
+
+                var resultSegment = container.GetBlobsAsync()
+                    .AsPages(default, 100);
+
+                // Enumerate the blobs returned for each page.
+                await foreach (Azure.Page<BlobItem> blobPage in resultSegment)
                 {
-                    _logger.LogInformation($"Blob name: {blobItem.Name} - {DateTime.Now}");
-                    archivos.Add(blobItem.Name);
+                    try
+                    {
+                        foreach (BlobItem blobItem in blobPage.Values)
+                        {
+                            try
+                            {
+                                _logger.LogInformation($"Blob name: {blobItem.Name} - {DateTime.Now}");
+                                archivos.Add(blobItem.Name);
+                            }
+                            catch(Exception ex)
+                            {
+                                _logger.LogError($"Ocurrio un error al obtener las imagenes totales de pictogramas en el Storage - 1:{ex.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Ocurrio un error al obtener las imagenes totales de pictogramas en el Storage - 2:{ex.Message}");
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"Ocurrio un error al obtener las imagenes totales de pictogramas en el Storage - 3:{ex.Message}");
             }
 
             return archivos;
