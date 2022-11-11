@@ -198,40 +198,39 @@ namespace PictogramasApi.Jobs
                         var imagen2 = _storageMgmt.Obtener(pictograma2.ToString());
                         var imagen3 = _storageMgmt.Obtener(pictograma3.ToString());
                         var imagen4 = _storageMgmt.Obtener(pictograma4.ToString());
-                        using (Image image1 = Image.FromStream(imagen1))
+                        try
                         {
-                            using (Image image2 = Image.FromStream(imagen2))
+                            using (Image image1 = Image.FromStream(imagen1))
                             {
-                                using (Image image3 = Image.FromStream(imagen3))
+                                try
+                                {
+                                    using (Image image2 = Image.FromStream(imagen2))
+                                        ObtenerImagenesDeCategoriaConImagenes3Y4(categoria, imagen2, imagen3, imagen4, image1, image2);
+                                }
+                                catch (Exception exce)
+                                {
+                                    ObtenerImagenesDeCategoriaConImagenes3Y4(categoria, imagen1, imagen3, imagen4, image1, image1);
+                                }
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            try
+                            {
+                                using (Image image2 = Image.FromStream(imagen2))
+                                    ObtenerImagenesDeCategoriaConImagenes3Y4(categoria, imagen2, imagen3, imagen4, image2, image2);
+                            }
+                            catch (Exception exce)
+                            {
+                                try
+                                {
+                                    using (Image image3 = Image.FromStream(imagen3))
+                                        ObtenerImagenesDeCategoriaConImagenes3Y4(categoria, imagen3, imagen3, imagen4, image3, image3);
+                                }
+                                catch (Exception ex2)
                                 {
                                     using (Image image4 = Image.FromStream(imagen4))
-                                    {
-                                        using (Bitmap bmp = new Bitmap(
-                                            image1.Width + image2.Width >= image3.Width + image4.Width ?
-                                                image1.Width + image2.Width + 80 : image3.Width + image4.Width + 80,
-                                            image1.Height + image3.Height >= image2.Height + image4.Height ?
-                                                image1.Height + image3.Height + 80 : image2.Height + image4.Height + 80))
-                                        {
-                                            using (Graphics g = Graphics.FromImage(bmp))
-                                            {
-                                                using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 255, 255)))
-                                                {
-                                                    g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height);
-                                                }
-                                                g.DrawImage(image1, 5, 5, image1.Width + 10, image1.Height + 10);
-                                                g.DrawImage(image2, image1.Width + 45, 5, image2.Width + 10, image2.Height + 10);
-                                                g.DrawImage(image3, 5, image1.Height + 15, image3.Width + 30, image3.Height + 30);
-                                                g.DrawImage(image4, image3.Width + 45, image2.Height + 15, image4.Width + 30, image4.Height + 30);
-
-                                                var stream = new System.IO.MemoryStream();
-                                                bmp.Save(stream, ImageFormat.Jpeg);
-                                                stream.Position = 0;
-                                                _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
-                                                _logger.LogInformation($"Se guardo la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
-                                            }
-
-                                        }
-                                    }
+                                        ObtenerImagenesDeCategoriaConImagenes3Y4(categoria, imagen4, imagen3, imagen3, image4, image4);
                                 }
                             }
                         }
@@ -242,6 +241,72 @@ namespace PictogramasApi.Jobs
                     }
                 }
                 _logger.LogInformation($"Se finalizo el guardado de imagenes de categorias - {DateTime.Now}");
+            }
+        }
+
+        private void ObtenerImagenesDeCategoriaConImagenes3Y4(Categoria categoria, Stream imagen2, Stream imagen3, Stream imagen4, Image image1, Image image2)
+        {
+            try
+            {
+                using (Image image3 = Image.FromStream(imagen3))
+                {
+                    try
+                    {
+                        ObtenerImagenCategoria(categoria, imagen4, image1, image2, image3);
+                    }
+                    catch (Exception ex)
+                    {
+                        ObtenerImagenCategoria(categoria, imagen3, image1, image2, image3);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    ObtenerImagenCategoria(categoria, imagen4, image1, image2, image2);
+
+                }
+                catch (Exception ex2)
+                {
+                    ObtenerImagenCategoria(categoria, imagen2, image1, image2, image2);
+                }
+            }
+        }
+
+        private void ObtenerImagenCategoria(Categoria categoria, Stream ImagenEnStream, Image image1, Image image2, Image image3)
+        {
+            using (Image image4 = Image.FromStream(ImagenEnStream))
+            {
+                GenerarYGuardarImagen(categoria, image1, image2, image3, image4);
+            }
+        }
+
+        private void GenerarYGuardarImagen(Categoria categoria, Image image1, Image image2, Image image3, Image image4)
+        {
+            using (Bitmap bmp = new Bitmap(
+                image1.Width + image2.Width >= image3.Width + image4.Width ?
+                    image1.Width + image2.Width + 80 : image3.Width + image4.Width + 80,
+                image1.Height + image3.Height >= image2.Height + image4.Height ?
+                    image1.Height + image3.Height + 80 : image2.Height + image4.Height + 80))
+            {
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 255, 255)))
+                    {
+                        g.FillRectangle(brush, 0, 0, bmp.Width, bmp.Height);
+                    }
+                    g.DrawImage(image1, 5, 5, image1.Width + 10, image1.Height + 10);
+                    g.DrawImage(image2, image1.Width + 45, 5, image2.Width + 10, image2.Height + 10);
+                    g.DrawImage(image3, 5, image1.Height + 15, image3.Width + 30, image3.Height + 30);
+                    g.DrawImage(image4, image3.Width + 45, image2.Height + 15, image4.Width + 30, image4.Height + 30);
+
+                    var stream = new System.IO.MemoryStream();
+                    bmp.Save(stream, ImageFormat.Jpeg);
+                    stream.Position = 0;
+                    _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
+                    _logger.LogInformation($"Se guardo la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
+                }
             }
         }
 
