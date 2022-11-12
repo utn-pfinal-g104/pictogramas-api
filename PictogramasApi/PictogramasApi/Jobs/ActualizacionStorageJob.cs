@@ -190,6 +190,10 @@ namespace PictogramasApi.Jobs
                     {
                         var pictogramasFiltrados = pictogramasNuestros.Where(p => p.Sex == false && p.Violence == false);
                         var pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                        if(pictogramasDeCategoria.Count == 0)
+                        {
+                            pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasNuestros.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                        }
                         var pictograma1 = pictogramasDeCategoria[0] != null ? pictogramasDeCategoria[0].IdPictograma : 0;
                         var pictograma2 = pictogramasDeCategoria.Count > 1 && pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : pictograma1;
                         var pictograma3 = pictogramasDeCategoria.Count > 2 && pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : pictograma2;
@@ -304,6 +308,7 @@ namespace PictogramasApi.Jobs
                     var stream = new System.IO.MemoryStream();
                     bmp.Save(stream, ImageFormat.Jpeg);
                     stream.Position = 0;
+                    _logger.LogInformation($"Se guarda la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
                     _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
                     _logger.LogInformation($"Se guardo la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
                 }
