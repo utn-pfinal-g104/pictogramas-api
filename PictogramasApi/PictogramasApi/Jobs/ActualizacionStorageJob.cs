@@ -144,6 +144,14 @@ namespace PictogramasApi.Jobs
                         catch (Exception ex)
                         {
                             _logger.LogInformation($"Error al guardar el pictograma {pictograma.IdArasaac} en el storage - {ex.Message} - {DateTime.Now}");
+                            try
+                            {
+                                _storageMgmt.Borrar($"{pictogramasNuestros.FirstOrDefault(p => p.IdArasaac == pictograma.IdArasaac).Id}");
+                            }
+                            catch(Exception ex2)
+                            {
+
+                            }
                         }
                     }
 
@@ -309,8 +317,23 @@ namespace PictogramasApi.Jobs
                     bmp.Save(stream, ImageFormat.Jpeg);
                     stream.Position = 0;
                     _logger.LogInformation($"Se guarda la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
-                    _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
-                    _logger.LogInformation($"Se guardo la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
+                    try
+                    {
+                        _storageMgmt.GuardarImagenCategoria(stream, categoria.Id.ToString());
+                        _logger.LogInformation($"Se guardo la imagen de la categoria: {categoria.Id} - {DateTime.Now}");
+                    }
+                    catch(Exception ex)
+                    {
+                        try
+                        {
+                            _logger.LogInformation($"Fallo guardado de imagen de categoria en storage - Categoria: {categoria.Id} - {DateTime.Now} - Error: {ex.Message}");
+                            _storageMgmt.Borrar(categoria.Id.ToString());
+                        }
+                        catch (Exception ex2)
+                        {
+
+                        }
+                    }
                 }
             }
         }
