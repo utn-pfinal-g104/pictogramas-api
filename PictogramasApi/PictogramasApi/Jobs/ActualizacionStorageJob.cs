@@ -200,8 +200,33 @@ namespace PictogramasApi.Jobs
                         var pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
                         if(pictogramasDeCategoria.Count == 0)
                         {
-                            pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == categoria.Id && pictogramasNuestros.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                            var otraCategoria = categoriasNuestras.Where(c => c.CategoriaPadre == categoria.Id).ToList();
+                            if (otraCategoria.Count > 0)
+                            {
+                                pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[0].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                                if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 1)
+                                {
+                                    pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[1].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                                }
+                                if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 2)
+                                {
+                                    pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[2].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                                }
+                                if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 3)
+                                {
+                                    pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[3].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                                }
+                                if(pictogramasDeCategoria.Count == 0)
+                                {
+                                    otraCategoria = ObtenerCategoriaConPictogramas(categoriasNuestras, picsXcats, categoria, pictogramasFiltrados, ref pictogramasDeCategoria);
+                                }
+                            }
+                            else
+                            {
+                                otraCategoria = ObtenerCategoriaConPictogramas(categoriasNuestras, picsXcats, categoria, pictogramasFiltrados, ref pictogramasDeCategoria);
+                            }
                         }
+
                         var pictograma1 = pictogramasDeCategoria[0] != null ? pictogramasDeCategoria[0].IdPictograma : 0;
                         var pictograma2 = pictogramasDeCategoria.Count > 1 && pictogramasDeCategoria[1] != null ? pictogramasDeCategoria[1].IdPictograma : pictograma1;
                         var pictograma3 = pictogramasDeCategoria.Count > 2 && pictogramasDeCategoria[2] != null ? pictogramasDeCategoria[2].IdPictograma : pictograma2;
@@ -254,6 +279,57 @@ namespace PictogramasApi.Jobs
                 }
                 _logger.LogInformation($"Se finalizo el guardado de imagenes de categorias - {DateTime.Now}");
             }
+        }
+
+        private static List<Categoria> ObtenerCategoriaConPictogramas(List<Categoria> categoriasNuestras, List<PictogramaPorCategoria> picsXcats, Categoria categoria, IEnumerable<Pictograma> pictogramasFiltrados, ref List<PictogramaPorCategoria> pictogramasDeCategoria)
+        {
+            List<Categoria> otraCategoria = categoriasNuestras.Where(c => c.Nombre == categoria.Nombre && c.Id != categoria.Id).ToList();
+            if (otraCategoria.Count > 0)
+            {
+                pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[0].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 1)
+                {
+                    pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[1].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                }
+            }
+            else
+            {
+                otraCategoria = categoriasNuestras.Where(c => c.Id == categoria.CategoriaPadre).ToList();
+                if (otraCategoria.Count > 0)
+                {
+                    pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[0].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                    if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 1)
+                    {
+                        pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[1].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                    }
+                    else
+                    {
+                        otraCategoria = categoriasNuestras.Where(c => c.CategoriaPadre == otraCategoria[0].Id).ToList();
+                        if (otraCategoria.Count > 0)
+                        {
+                            pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[0].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                            if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 1)
+                            {
+                                pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[1].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                            }
+                            if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 2)
+                            {
+                                pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[2].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                            }
+                            if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 3)
+                            {
+                                pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[3].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                            }
+                            if (pictogramasDeCategoria.Count == 0 && otraCategoria.Count > 4)
+                            {
+                                pictogramasDeCategoria = picsXcats.Where(p => p.IdCategoria == otraCategoria[4].Id && pictogramasFiltrados.Any(pf => pf.Id == p.IdPictograma)).ToList();
+                            }
+                        }
+                    }
+                }
+            }
+
+            return otraCategoria;
         }
 
         private void ObtenerImagenesDeCategoriaConImagenes3Y4(Categoria categoria, Stream imagen2, Stream imagen3, Stream imagen4, Image image1, Image image2)
