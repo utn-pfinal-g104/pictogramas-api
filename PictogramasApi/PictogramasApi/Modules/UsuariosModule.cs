@@ -156,7 +156,7 @@ namespace PictogramasApi.Modules
                 Usuario usuario = await _usuarioMgmt.GetUsuario(usuarioRequest.NombreUsuario, password);
                 if (usuario == null)
                 {
-                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel = 0, UltimaActualizacion = DateTime.Now });
+                    usuario = await _usuarioMgmt.CrearUsuario(new Usuario { NombreUsuario = usuarioRequest.NombreUsuario, Password = password, Nivel = 0, UltimaActualizacion = DateTime.Now.AddHours(-3) });
                 }
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson(usuario);
@@ -172,7 +172,6 @@ namespace PictogramasApi.Modules
                 var usuario = await ctx.Request.Bind<Usuario>();
                 // TODO: Encriptar / hashear password
                 usuario.Password = Seguridad.sha256_hash(usuario.Password);
-                usuario.UltimaActualizacion = DateTime.Now;
                 await _usuarioMgmt.ActualizarUsuario(usuario);
                 ctx.Response.StatusCode = 201;
                 await ctx.Response.AsJson("Usuario creado");
@@ -184,7 +183,6 @@ namespace PictogramasApi.Modules
             Put("/", async (ctx) =>
             {
                 var usuario = await ctx.Request.Bind<Usuario>();
-                usuario.UltimaActualizacion = DateTime.Now;
                 await _usuarioMgmt.ActualizarUsuario(usuario);
                 try 
                 {
