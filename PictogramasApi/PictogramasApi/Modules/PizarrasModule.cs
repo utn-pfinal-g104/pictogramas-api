@@ -40,7 +40,7 @@ namespace PictogramasApi.Modules
                 try
                 {
                     var request = await ctx.Request.Bind<Pizarra>();
-                    request.UltimaActualizacion = DateTime.Now;
+                    request.UltimaActualizacion = request.UltimaActualizacion;
                     request = _pizarraMgmt.GuardarPizarra(request);
                     _pizarraMgmt.GuardarCeldasDePizarra(request);
                     await ctx.Response.Negotiate(request);

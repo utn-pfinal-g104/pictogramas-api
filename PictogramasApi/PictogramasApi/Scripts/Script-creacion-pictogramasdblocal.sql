@@ -224,7 +224,7 @@ REFERENCES [dbo].[Usuarios] ([Id])
 GO
 
 CREATE TABLE [dbo].[Pizarras](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Id] [int] NOT NULL,
 	[UsuarioId] [int] NOT NULL,
 	[Filas] [int] NOT NULL,
 	[Columnas] [int] NOT NULL,
