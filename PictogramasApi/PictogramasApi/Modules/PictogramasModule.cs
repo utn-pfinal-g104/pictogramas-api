@@ -140,7 +140,7 @@ namespace PictogramasApi.Modules
 
         private void BorrarImagenesDeStoragePorRango()
         {
-            Get("/desde/{desde:int}}/hasta/{hasta:int}", async (ctx) =>
+            Get("/desde/{desde:int}/hasta/{hasta:int}", async (ctx) =>
             {
                 var desde = ctx.Request.RouteValues.As<int>("desde");
                 var hasta = ctx.Request.RouteValues.As<int>("hasta");
