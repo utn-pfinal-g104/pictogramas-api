@@ -73,6 +73,7 @@ namespace PictogramasApi.Modules
 
             PostPictogramaPropio();
             DeletePictogramaDelStorage();
+            BorrarImagenesDeStoragePorRango();
             #endregion "Storage"
         }
 
@@ -133,6 +134,20 @@ namespace PictogramasApi.Modules
             Get("/guardar", async (ctx) =>
             {
                 await _actualizacionStorageJob.ActualizarPictogramas();
+                await ctx.Response.Negotiate("Pictogramas actualizados");
+            });
+        }
+
+        private void BorrarImagenesDeStoragePorRango()
+        {
+            Get("/desde/{desde:int}}/hasta/{hasta:int}", async (ctx) =>
+            {
+                var desde = ctx.Request.RouteValues.As<int>("desde");
+                var hasta = ctx.Request.RouteValues.As<int>("hasta");
+                for(int i = desde; i <= hasta; i++)
+                {
+                    _storageMgmt.Borrar(i.ToString());
+                }
                 await ctx.Response.Negotiate("Pictogramas actualizados");
             });
         }
