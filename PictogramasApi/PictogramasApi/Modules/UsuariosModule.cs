@@ -174,7 +174,7 @@ namespace PictogramasApi.Modules
                 usuario.Password = Seguridad.sha256_hash(usuario.Password);
                 await _usuarioMgmt.ActualizarUsuario(usuario);
                 ctx.Response.StatusCode = 201;
-                await ctx.Response.AsJson("Usuario creado");
+                await ctx.Response.AsJson("Usuario Actualizado");
             });
         }
 
@@ -190,6 +190,7 @@ namespace PictogramasApi.Modules
                     {
                         var imagenEnBase64 = usuario.Imagen.Substring(usuario.Imagen.LastIndexOf(',') + 1);
                         var imagen = Parser.ConvertFromBase64(imagenEnBase64);
+                        _storageMgmt.BorrarImagenDeUsuario(usuario.Id.ToString());
                         _storageMgmt.GuardarImagenUsuario(imagen, usuario.Id.ToString());
                     }
                 }
@@ -198,7 +199,7 @@ namespace PictogramasApi.Modules
 
                 }
                 ctx.Response.StatusCode = 201;
-                await ctx.Response.AsJson("Usuario creado");
+                await ctx.Response.AsJson("Usuario Actualizado");
             });
         }
     }

@@ -158,5 +158,11 @@ namespace PictogramasApi.Mgmt.CMS
                 blob.DeleteIfExists();
             });
         }
+
+        public void BorrarImagenDeUsuario(string filename)
+        {
+            BlobClient blob = usuariosContainer.GetBlobClient(filename);
+            blob.DeleteIfExists();
+        }
     }
 }
