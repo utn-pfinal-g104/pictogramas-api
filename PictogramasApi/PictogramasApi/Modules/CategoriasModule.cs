@@ -4,6 +4,7 @@ using Carter.Response;
 using PictogramasApi.Mgmt.CMS;
 using PictogramasApi.Mgmt.Sql.Interface;
 using PictogramasApi.Utils;
+using System.Net.Mime;
 
 namespace PictogramasApi.Modules
 {
@@ -20,6 +21,7 @@ namespace PictogramasApi.Modules
             GetCategorias();
             GetTotalCategorias();
             GetCategoriaaDelStorageAsBase64();
+            GetCategoriaaDelStorage();
         }
 
         private void GetCategorias()
@@ -37,6 +39,27 @@ namespace PictogramasApi.Modules
             {
                 var categorias = await _categoriaMgmt.ObtenerTotalCategorias();
                 await ctx.Response.Negotiate(categorias);
+            });
+        }
+
+        private void GetCategoriaaDelStorage()
+        {
+            Get("/{filename:minlength(1)}/obtener", async (ctx) =>
+            {
+                var filename = ctx.Request.RouteValues.As<string>("filename");
+
+                var categoria = _storageMgmt.ObtenerImagenCategoria(filename);
+
+                if (categoria != null)
+                {
+                    await ctx.Response.FromStream(categoria, $"image/png",
+                        new ContentDisposition($"attachment;filename=pictograma.png"));
+                }
+                else
+                {
+                    ctx.Response.StatusCode = 404;
+                    await ctx.Response.Negotiate("No existe el pictograma");
+                }
             });
         }
 
